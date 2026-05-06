@@ -5,24 +5,26 @@ from PIL import Image
 from io import BytesIO
 import json
 
-st.set_page_config(page_title="Giải Bài Tập Từ Ảnh", page_icon="📘")
-st.title("📘 Giải Bài Tập Từ Ảnh Đa Ngữ")
+# =====================
+# CẤU HÌNH TRANG
+# =====================
+st.set_page_config(page_title="Trợ Lý Nông Nghiệp Bản Làng", page_icon="🌱")
+st.title("🌱 Trợ Lý Nông Nghiệp Bản Làng (Việt – H’Mông)")
+st.markdown("*Ứng dụng AI chẩn đoán bệnh cây trồng, vật nuôi cho đồng bào vùng cao.*")
+
+# Thêm lời cảnh báo an toàn để Ban giám khảo đánh giá cao tính thực tế và trách nhiệm
+st.warning("⚠️ Lưu ý: Kết quả chẩn đoán của AI chỉ mang tính chất tham khảo bước đầu. Bà con nên kết hợp với kinh nghiệm thực tế hoặc báo cho cán bộ khuyến nông/thú y xã nếu bệnh lây lan nhanh.")
 
 # =====================
 # 🔑 NHẬP GOOGLE API KEY
 # =====================
-
 with st.expander("🔑 Hướng dẫn lấy Google API Key (bấm để xem)"):
     st.markdown("""
-### 👉 Cách lấy Google API Key để dùng ứng dụng:
-
+### 👉 Cách lấy Google API Key:
 1. Truy cập: **https://aistudio.google.com/app/apikey**
 2. Đăng nhập Gmail.
 3. Nhấn **Create API key**.
-4. Copy API Key.
-5. Dán vào ô bên dưới.
-
-⚠️ Không chia sẻ API Key cho người khác.
+4. Copy API Key và dán vào ô bên dưới.
 """)
 
 st.subheader("🔐 Nhập Google API Key:")
@@ -37,7 +39,6 @@ else:
 # ===============================
 # 📌 HÀM GỌI GEMINI
 # ===============================
-
 def analyze_real_image(api_key, image, prompt):
     if image.mode == "RGBA":
         image = image.convert("RGB")
@@ -77,11 +78,10 @@ def analyze_real_image(api_key, image, prompt):
 # ===============================
 # 📸 CHỤP HOẶC TẢI ẢNH
 # ===============================
-
-st.subheader("📷 Chụp ảnh đề bài")
+st.subheader("📷 Chụp ảnh cây trồng/vật nuôi bị bệnh")
 photo = st.camera_input("Chụp từ camera:")
 
-st.subheader("📤 Hoặc tải ảnh đề bài lên")
+st.subheader("📤 Hoặc tải ảnh có sẵn lên")
 upload = st.file_uploader("Chọn ảnh:", type=["png", "jpg", "jpeg"])
 
 image = None
@@ -92,89 +92,70 @@ elif upload:
 
 
 # ===============================
-# 🧠 GIẢI BÀI TẬP TỪ ẢNH
+# 🧠 XỬ LÝ CHẨN ĐOÁN
 # ===============================
-
 if image:
-
     col1, col2 = st.columns([1, 1.5])
 
     with col1:
-        st.image(image, caption="Ảnh đề bài", use_column_width=True)
+        st.image(image, caption="Ảnh thực tế", use_column_width=True)
 
     with col2:
-        # ===============================
-        # ⚙️ TÙY CHỌN NGÔN NGỮ
-        # ===============================
-        st.subheader("⚙️ Tùy chọn ngôn ngữ:")
-        st.markdown("**Tiếng Việt**")
-        use_hmong = st.checkbox("Tiếng Mông", value=True)
-        use_english = st.checkbox("Tiếng Anh", value=True)
+        # Tùy chọn ngôn ngữ (Đã bỏ tiếng Anh, tập trung vào bản làng)
+        st.subheader("⚙️ Tùy chọn ngôn ngữ tư vấn:")
+        st.markdown("**Tiếng Việt** (Luôn có)")
+        use_hmong = st.checkbox("Dịch sang Tiếng H’Mông", value=True)
         
         st.markdown("---")
-        st.subheader("🔍 Kết quả giải bài:")
+        st.subheader("🔍 Kết quả chẩn đoán:")
 
-        if st.button("Giải bài tập", type="primary"):
+        if st.button("Bắt đầu chẩn đoán", type="primary"):
 
             if not api_key:
                 st.error("❌ Bạn chưa nhập API Key!")
             else:
-                with st.spinner("⏳ Đang giải bài..."):
+                with st.spinner("⏳ Kỹ sư AI đang phân tích..."):
                     
-                    # Cấu trúc chuỗi ngôn ngữ dựa trên lựa chọn
-                    langs_requested = ["Việt"]
-                    if use_hmong: langs_requested.append("H’Mông")
-                    if use_english: langs_requested.append("Anh")
-                    lang_str = " – ".join(langs_requested)
+                    # Thiết lập danh sách ngôn ngữ động
+                    langs = ["Việt"]
+                    if use_hmong: langs.append("H’Mông")
+                    lang_str = " – ".join(langs)
                     
-                    # Tạo hướng dẫn chép đề bài động
-                    chep_de = "- Dòng 1: Tiếng Việt.\n"
-                    line_idx = 2
-                    if use_hmong:
-                        chep_de += f"- Dòng {line_idx}: Tiếng H’Mông.\n"
-                        line_idx += 1
-                    if use_english:
-                        chep_de += f"- Dòng {line_idx}: Tiếng Anh.\n"
-                        
-                    # Tạo hướng dẫn giải bài tập động
-                    giai_bai = "- Tiếng Việt: [Nội dung giải thích]\n"
-                    if use_hmong:
-                        giai_bai += "- Tiếng H’Mông: [Nội dung giải thích]\n"
-                    if use_english:
-                        giai_bai += "- Tiếng Anh: [Nội dung giải thích]\n"
+                    prompt_structure = "Tiếng Việt"
+                    if use_hmong: prompt_structure += " và Tiếng H’Mông"
 
                     # ===============================
-                    # 🧠 PROMPT CHUẨN – GIÁO VIÊN ĐA NĂNG
+                    # 🧠 PROMPT TỐI ƯU CÓ CẢNH BÁO AN TOÀN
                     # ===============================
                     prompt_text = fr"""
-Bạn là một giáo viên đa năng xuất sắc. Hãy **giải bài tập trong ảnh** (bất kể là môn Toán, Lý, Hóa, Văn, Anh...) theo cách NGẮN – DỄ HIỂU – ĐA NGỮ ({lang_str}).
+Bạn là một kỹ sư nông nghiệp và bác sĩ thú y giàu kinh nghiệm, đặc biệt am hiểu thực tế làm nông ở vùng cao.
+Hãy quan sát kỹ bức ảnh và **chẩn đoán bệnh**, đưa ra lời khuyên theo phong cách DỄ HIỂU, GẦN GŨI VỚI BÀ CON NÔNG DÂN bằng ({lang_str}).
 
 ==============================
-⚠️ QUY TẮC TRÌNH BÀY
+⚠️ QUY TẮC AN TOÀN CHẨN ĐOÁN
 ==============================
-- Nếu có công thức (Toán, Lý, Hóa), hãy đặt trong khối:
-  $$
-  ... \\
-  $$
-  Và dùng chuẩn LaTeX. TUYỆT ĐỐI KHÔNG sinh ký tự lạ.
-- Nếu là bài tập lý thuyết/chữ, trình bày rõ ràng từng đoạn, không cần gượng ép dùng công thức.
+- Nếu ảnh KHÔNG RÕ RÀNG hoặc KHÔNG PHẢI cây trồng/vật nuôi: Hãy nói thật là "Ảnh mờ quá hoặc không đúng chủ đề, AI không nhìn rõ, bà con chụp lại nhé". TUYỆT ĐỐI KHÔNG đoán bừa.
+- Nếu bệnh có nhiều nguyên nhân giống nhau: Hãy liệt kê các khả năng (Ví dụ: "Lá vàng này có thể do thiếu phân hoặc do úng nước...").
+- Luôn có câu chốt: "Khuyên bà con nên báo cho cán bộ thú y/khuyến nông xã để được hỗ trợ thêm".
 
 =====================
-1️⃣ CHÉP LẠI ĐỀ BÀI (Tóm tắt)
+1️⃣ CHẨN ĐOÁN BỆNH
 =====================
-{chep_de.strip()}
+- Nhìn vào ảnh, đây là con vật/cây gì? Triệu chứng hiện tại là gì?
+- Dự đoán bệnh (Trình bày bằng: {prompt_structure}).
 
 ==========================
-2️⃣ GIẢI BÀI TẬP (ĐA NGỮ)
+2️⃣ CÁCH XỬ LÝ (Tham khảo)
 ==========================
-Trình bày từng bước logic:
-{giai_bai.strip()}
-- Công thức (nếu có): Đặt trong khối $$...$$
+- Cách cách ly, chăm sóc để không lây lan.
+- Gợi ý cách xử lý an toàn, thuốc phổ thông hoặc kinh nghiệm dân gian (Trình bày bằng {prompt_structure}).
 
 ==========================
-3️⃣ TRÌNH BÀY RÕ RÀNG
+3️⃣ LƯU Ý TRÌNH BÀY
 ==========================
-- Câu ngắn, xuống dòng rõ ràng.
+- Sử dụng từ ngữ mộc mạc, ngắn gọn. 
+- Phân đoạn rõ ràng giữa Tiếng Việt và Tiếng H'Mông để bà con dễ đọc.
+- Tuyệt đối không dùng các thuật ngữ khoa học hàn lâm phức tạp.
 """
 
                     result = analyze_real_image(api_key, image, prompt_text)
@@ -182,5 +163,5 @@ Trình bày từng bước logic:
                     if result.startswith("❌"):
                         st.error(result)
                     else:
-                        st.success("🎉 Hoàn thành!")
+                        st.success("🎉 Đã có kết quả!")
                         st.markdown(result)
