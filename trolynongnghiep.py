@@ -4,40 +4,61 @@ import base64
 from PIL import Image
 from io import BytesIO
 import json
+from datetime import datetime
 
 # =====================
-# CẤU HÌNH TRANG
+# CẤU HÌNH TRANG & CSS
 # =====================
-st.set_page_config(page_title="Trợ Lý Nông Nghiệp Bản Làng", page_icon="🌱")
-st.title("🌱 Trợ Lý Nông Nghiệp Bản Làng (Việt – H’Mông)")
-st.markdown("*Ứng dụng AI chẩn đoán bệnh cây trồng, vật nuôi cho đồng bào vùng cao.*")
+st.set_page_config(page_title="Trợ Lý Nông Nghiệp Bản Làng", page_icon="🌱", layout="wide")
 
-# Thêm lời cảnh báo an toàn để Ban giám khảo đánh giá cao tính thực tế và trách nhiệm
-st.warning("⚠️ Lưu ý: Kết quả chẩn đoán của AI chỉ mang tính chất tham khảo bước đầu. Bà con nên kết hợp với kinh nghiệm thực tế hoặc báo cho cán bộ khuyến nông/thú y xã nếu bệnh lây lan nhanh.")
+# CSS Tùy chỉnh để làm đẹp giao diện
+st.markdown("""
+    <style>
+    .main-title { color: #2e7d32; text-align: center; font-weight: bold; }
+    .sub-title { text-align: center; color: #555; font-style: italic; margin-bottom: 20px; }
+    .warning-box { background-color: #fff3cd; color: #856404; padding: 15px; border-left: 5px solid #ffeeba; border-radius: 5px; margin-bottom: 20px; font-size: 0.95em;}
+    .stButton>button { background-color: #2e7d32; color: white; border-radius: 8px; font-weight: bold; width: 100%; transition: 0.3s; }
+    .stButton>button:hover { background-color: #1b5e20; border-color: #1b5e20; }
+    </style>
+""", unsafe_allow_html=True)
+
+# Khởi tạo Session State để lưu lịch sử
+if "history" not in st.session_state:
+    st.session_state.history = []
 
 # =====================
-# 🔑 NHẬP GOOGLE API KEY
+# SIDEBAR: CẤU HÌNH API
 # =====================
-with st.expander("🔑 Hướng dẫn lấy Google API Key (bấm để xem)"):
-    st.markdown("""
-### 👉 Cách lấy Google API Key:
-1. Truy cập: **https://aistudio.google.com/app/apikey**
-2. Đăng nhập Gmail.
-3. Nhấn **Create API key**.
-4. Copy API Key và dán vào ô bên dưới.
-""")
+with st.sidebar:
+    st.image("https://cdn-icons-png.flaticon.com/512/3004/3004122.png", width=80)
+    st.header("⚙️ Cấu hình hệ thống")
+    api_key = st.text_input("🔑 Nhập Google API Key:", type="password", help="Bắt buộc để sử dụng AI")
+    
+    with st.expander("👉 Hướng dẫn lấy API Key"):
+        st.markdown("""
+        1. Vào **[Google AI Studio](https://aistudio.google.com/app/apikey)**
+        2. Đăng nhập Gmail.
+        3. Nhấn **Create API key**.
+        4. Copy và dán vào ô bên trên.
+        """)
+        
+    st.markdown("---")
+    st.caption("Bản quyền © 2026. Ứng dụng hỗ trợ đồng bào vùng cao.")
 
-st.subheader("🔐 Nhập Google API Key:")
-api_key = st.text_input("Google API Key:", type="password")
+# =====================
+# GIAO DIỆN CHÍNH
+# =====================
+st.markdown("<h1 class='main-title'>🌱 Trợ Lý Nông Nghiệp Bản Làng</h1>", unsafe_allow_html=True)
+st.markdown("<p class='sub-title'>Hỗ trợ chẩn đoán bệnh cây trồng, vật nuôi (Việt – H’Mông)</p>", unsafe_allow_html=True)
 
-if not api_key:
-    st.warning("⚠️ Nhập API Key để tiếp tục.")
-else:
-    st.success("✅ API Key hợp lệ!")
-
+st.markdown("""
+<div class='warning-box'>
+    <b>⚠️ Lưu ý an toàn:</b> Kết quả chẩn đoán của AI chỉ mang tính chất tham khảo bước đầu. Bà con nên kết hợp với kinh nghiệm thực tế hoặc báo ngay cho cán bộ khuyến nông/thú y xã nếu bệnh lây lan nhanh.
+</div>
+""", unsafe_allow_html=True)
 
 # ===============================
-# 📌 HÀM GỌI GEMINI
+# HÀM GỌI GEMINI (GIỮ NGUYÊN LOGIC CỦA BẠN)
 # ===============================
 def analyze_real_image(api_key, image, prompt):
     if image.mode == "RGBA":
@@ -74,62 +95,76 @@ def analyze_real_image(api_key, image, prompt):
     except Exception as e:
         return f"❌ Lỗi kết nối: {str(e)}"
 
-
 # ===============================
-# 📸 CHỤP HOẶC TẢI ẢNH
+# KHU VỰC NHẬP DỮ LIỆU
 # ===============================
-st.subheader("📷 Chụp ảnh cây trồng/vật nuôi bị bệnh")
-photo = st.camera_input("Chụp từ camera:")
+col_input, col_settings = st.columns([1.5, 1], gap="large")
 
-st.subheader("📤 Hoặc tải ảnh có sẵn lên")
-upload = st.file_uploader("Chọn ảnh:", type=["png", "jpg", "jpeg"])
+with col_input:
+    st.subheader("📸 Cung cấp hình ảnh")
+    # Sử dụng Tabs để giao diện gọn gàng hơn
+    tab1, tab2 = st.tabs(["📷 Chụp từ Camera", "📤 Tải ảnh có sẵn"])
+    
+    photo, upload = None, None
+    with tab1:
+        photo = st.camera_input("Chụp ảnh cây/con vật bị bệnh:")
+    with tab2:
+        upload = st.file_uploader("Chọn ảnh từ điện thoại/máy tính:", type=["png", "jpg", "jpeg"])
 
-image = None
-if photo:
-    image = Image.open(photo)
-elif upload:
-    image = Image.open(upload)
-
-
-# ===============================
-# 🧠 XỬ LÝ CHẨN ĐOÁN
-# ===============================
-if image:
-    col1, col2 = st.columns([1, 1.5])
-
-    with col1:
-        st.image(image, caption="Ảnh thực tế", use_column_width=True)
-
-    with col2:
-        # Tùy chọn ngôn ngữ (Đã bỏ tiếng Anh, tập trung vào bản làng)
-        st.subheader("⚙️ Tùy chọn ngôn ngữ tư vấn:")
-        st.markdown("**Tiếng Việt** (Luôn có)")
-        use_hmong = st.checkbox("Dịch sang Tiếng H’Mông", value=True)
+    image = None
+    if photo:
+        image = Image.open(photo)
+    elif upload:
+        image = Image.open(upload)
         
-        st.markdown("---")
-        st.subheader("🔍 Kết quả chẩn đoán:")
+    if image:
+        st.success("✅ Đã nhận ảnh thành công!")
 
-        if st.button("Bắt đầu chẩn đoán", type="primary"):
+with col_settings:
+    st.subheader("📝 Thông tin bổ sung")
+    extra_info = st.text_area("Mô tả thêm triệu chứng (Không bắt buộc):", 
+                              placeholder="Ví dụ: Lợn bỏ ăn 2 ngày, bị tiêu chảy... hoặc Cây héo lá từ gốc lên...",
+                              height=100)
+    
+    st.subheader("⚙️ Tùy chọn chẩn đoán")
+    st.markdown("**Ngôn ngữ hiển thị:**")
+    use_hmong = st.checkbox("✅ Dịch kèm Tiếng H’Mông", value=True)
+    
+    submit_btn = st.button("🔍 BẮT ĐẦU CHẨN ĐOÁN", type="primary", use_container_width=True)
 
-            if not api_key:
-                st.error("❌ Bạn chưa nhập API Key!")
-            else:
-                with st.spinner("⏳ Kỹ sư AI đang phân tích..."):
-                    
-                    # Thiết lập danh sách ngôn ngữ động
-                    langs = ["Việt"]
-                    if use_hmong: langs.append("H’Mông")
-                    lang_str = " – ".join(langs)
-                    
-                    prompt_structure = "Tiếng Việt"
-                    if use_hmong: prompt_structure += " và Tiếng H’Mông"
+st.markdown("---")
 
-                    # ===============================
-                    # 🧠 PROMPT TỐI ƯU CÓ CẢNH BÁO AN TOÀN
-                    # ===============================
-                    prompt_text = fr"""
+# ===============================
+# XỬ LÝ & HIỂN THỊ KẾT QUẢ
+# ===============================
+if submit_btn:
+    if not image:
+        st.error("❌ Vui lòng chụp hoặc tải ảnh lên trước khi chẩn đoán!")
+    elif not api_key:
+        st.error("❌ Bạn chưa nhập Google API Key ở thanh công cụ bên trái (Sidebar)!")
+    else:
+        # Layout kết quả
+        res_col1, res_col2 = st.columns([1, 2], gap="large")
+        
+        with res_col1:
+            st.image(image, caption="Ảnh bà con cung cấp", use_container_width=True)
+            
+        with res_col2:
+            with st.spinner("⏳ Kỹ sư AI đang phân tích dữ liệu..."):
+                # Thiết lập danh sách ngôn ngữ động
+                langs = ["Việt"]
+                if use_hmong: langs.append("H’Mông")
+                lang_str = " – ".join(langs)
+                
+                prompt_structure = "Tiếng Việt"
+                if use_hmong: prompt_structure += " và Tiếng H’Mông"
+                
+                extra_prompt = f"\n- Thông tin bổ sung từ bà con: {extra_info}" if extra_info else ""
+
+                # PROMPT ĐƯỢC GIỮ NGUYÊN VÀ BỔ SUNG THÊM THÔNG TIN MÔ TẢ
+                prompt_text = fr"""
 Bạn là một kỹ sư nông nghiệp và bác sĩ thú y giàu kinh nghiệm, đặc biệt am hiểu thực tế làm nông ở vùng cao.
-Hãy quan sát kỹ bức ảnh và **chẩn đoán bệnh**, đưa ra lời khuyên theo phong cách DỄ HIỂU, GẦN GŨI VỚI BÀ CON NÔNG DÂN bằng ({lang_str}).
+Hãy quan sát kỹ bức ảnh và **chẩn đoán bệnh**, đưa ra lời khuyên theo phong cách DỄ HIỂU, GẦN GŨI VỚI BÀ CON NÔNG DÂN bằng ({lang_str}).{extra_prompt}
 
 ==============================
 ⚠️ QUY TẮC AN TOÀN CHẨN ĐOÁN
@@ -157,11 +192,38 @@ Hãy quan sát kỹ bức ảnh và **chẩn đoán bệnh**, đưa ra lời khu
 - Phân đoạn rõ ràng giữa Tiếng Việt và Tiếng H'Mông để bà con dễ đọc.
 - Tuyệt đối không dùng các thuật ngữ khoa học hàn lâm phức tạp.
 """
-
-                    result = analyze_real_image(api_key, image, prompt_text)
-
-                    if result.startswith("❌"):
-                        st.error(result)
-                    else:
-                        st.success("🎉 Đã có kết quả!")
+                result = analyze_real_image(api_key, image, prompt_text)
+                
+                if result.startswith("❌"):
+                    st.error(result)
+                else:
+                    st.toast('🎉 Phân tích hoàn tất!', icon='✅')
+                    st.success("📝 Dưới đây là kết quả phân tích từ Trợ lý AI:")
+                    
+                    # Hiển thị kết quả trong khung đẹp mắt
+                    with st.container(border=True):
                         st.markdown(result)
+                    
+                    # Lưu vào lịch sử
+                    timestamp = datetime.now().strftime("%d/%m/%Y %H:%M")
+                    st.session_state.history.insert(0, {"time": timestamp, "result": result, "info": extra_info})
+                    
+                    # TÍNH NĂNG MỚI: Nút tải kết quả (Download)
+                    st.download_button(
+                        label="📥 Tải kết quả này về máy (File Text)",
+                        data=result,
+                        file_name=f"Chan_doan_Nong_Nghiep_{datetime.now().strftime('%Y%m%d_%H%M')}.txt",
+                        mime="text/plain"
+                    )
+
+# ===============================
+# TÍNH NĂNG MỚI: LỊCH SỬ CHẨN ĐOÁN
+# ===============================
+if st.session_state.history:
+    st.markdown("---")
+    st.subheader("🕒 Lịch sử chẩn đoán gần đây")
+    for i, item in enumerate(st.session_state.history[:3]): # Chỉ hiện 3 cái gần nhất cho gọn
+        with st.expander(f"Kết quả lúc: {item['time']}"):
+            if item['info']:
+                st.caption(f"**Mô tả của bà con:** {item['info']}")
+            st.markdown(item['result'])
