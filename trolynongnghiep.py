@@ -3,82 +3,139 @@ import requests
 import base64
 from PIL import Image
 from io import BytesIO
-import json
 from datetime import datetime
 import re
 from gtts import gTTS
 
 # =====================
-# 1. CẤU HÌNH TRANG & CSS
+# 1. CẤU HÌNH TRANG TỐI ƯU
 # =====================
-st.set_page_config(page_title="Trợ Lý Nông Nghiệp Bản Làng", page_icon="🌾", layout="centered")
+st.set_page_config(page_title="Trợ Lý Nông Nghiệp", page_icon="🌱", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS tùy chỉnh tối ưu cho di động & bà con nông dân (Chữ to, Nút nổi, Phân vùng rõ ràng)
+# TÍCH HỢP CSS NÂNG CAO (GIAO DIỆN CHUYÊN NGHIỆP)
 st.markdown("""
     <style>
-    /* Tiêu đề chính */
-    .main-title { color: #1b5e20; text-align: center; font-weight: 900; font-size: 32px; margin-bottom: 5px; }
-    .sub-title { text-align: center; color: #4caf50; font-size: 16px; font-weight: 500; margin-bottom: 25px; }
+    /* Nhúng Font Be Vietnam Pro cực đẹp */
+    @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap');
+
+    html, body, [class*="css"] {
+        font-family: 'Be Vietnam Pro', sans-serif !important;
+    }
+
+    /* Tiêu đề chính dạng App */
+    .app-header {
+        background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
+        padding: 25px 15px;
+        border-radius: 16px;
+        color: white;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(46, 125, 50, 0.3);
+        margin-bottom: 25px;
+    }
+    .app-header h1 { color: white !important; font-weight: 800; font-size: 30px; margin: 0; padding: 0; line-height: 1.2; }
+    .app-header p { font-size: 16px; font-weight: 500; opacity: 0.9; margin-top: 5px; margin-bottom: 0; }
+
+    /* Lời dặn / Cảnh báo */
+    .note-box {
+        background-color: #fff9e6;
+        border: 1px solid #ffe082;
+        border-left: 6px solid #ffb300;
+        padding: 18px;
+        border-radius: 12px;
+        color: #5c4000;
+        font-size: 15px;
+        line-height: 1.6;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+
+    /* Các khung bước (Cards) */
+    .step-card {
+        background-color: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+    }
     
-    /* Hộp cảnh báo mộc mạc */
-    .warning-box { background-color: #fff8e1; color: #b71c1c; padding: 15px; border-left: 6px solid #ffca28; border-radius: 8px; margin-bottom: 25px; font-size: 15px; line-height: 1.5; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .step-title {
+        color: #1b5e20;
+        font-weight: 700;
+        font-size: 19px;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-bottom: 2px solid #f1f8e9;
+        padding-bottom: 10px;
+    }
+
+    /* Nút bấm siêu nổi bật */
+    .stButton>button {
+        background: linear-gradient(to right, #f57c00, #ff9800) !important;
+        color: white !important;
+        border-radius: 50px !important; /* Bo tròn hoàn toàn */
+        font-weight: 700 !important;
+        font-size: 18px !important;
+        padding: 12px 0 !important;
+        border: none !important;
+        box-shadow: 0 6px 15px rgba(245, 124, 0, 0.3) !important;
+        transition: all 0.3s ease !important;
+    }
+    .stButton>button:hover {
+        transform: translateY(-3px) !important;
+        box-shadow: 0 8px 20px rgba(245, 124, 0, 0.4) !important;
+    }
+
+    /* Nút tải về khác màu */
+    .download-btn>button {
+        background: linear-gradient(to right, #0277bd, #039be5) !important;
+        box-shadow: 0 6px 15px rgba(2, 119, 189, 0.3) !important;
+    }
+
+    /* Text Area & Input to rõ */
+    .stTextArea textarea { font-size: 16px !important; border-radius: 10px !important; }
     
-    /* Tiêu đề từng bước */
-    .step-header { background-color: #e8f5e9; color: #2e7d32; padding: 12px 15px; border-radius: 8px; font-weight: bold; font-size: 18px; margin-top: 15px; margin-bottom: 15px; border-left: 6px solid #4caf50; }
-    
-    /* Nút bấm siêu to, dễ ấn trên điện thoại */
-    .stButton>button { background-color: #f57c00 !important; color: white !important; border-radius: 12px !important; font-weight: bold !important; font-size: 18px !important; padding: 15px 0 !important; width: 100%; transition: 0.3s; border: none !important; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    .stButton>button:hover { background-color: #ef6c00 !important; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
-    
-    /* Nút tải về nhẹ nhàng hơn */
-    .download-btn>button { background-color: #0288d1 !important; }
-    .download-btn>button:hover { background-color: #0277bd !important; }
     </style>
 """, unsafe_allow_html=True)
 
-# Khởi tạo Lịch sử nếu chưa có
+# Khởi tạo Lịch sử
 if "history" not in st.session_state:
     st.session_state.history = []
 
 # =====================
-# 2. CẤU HÌNH API (SIDEBAR)
+# 2. MENU CÀI ĐẶT ẨN (SIDEBAR)
 # =====================
 with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/862/862856.png", width=70)
-    st.header("⚙️ Dành cho Cán Bộ/Kỹ thuật")
-    st.markdown("Vui lòng nhập API Key để kích hoạt AI.")
+    st.image("https://cdn-icons-png.flaticon.com/512/862/862856.png", width=60)
+    st.markdown("### ⚙️ Cài đặt Quản trị")
+    st.caption("Dành riêng cho ban tổ chức/kỹ thuật viên nhập API Key của Google.")
     api_key = st.text_input("🔑 Google API Key:", type="password")
-    
-    with st.expander("👉 Cách lấy API Key (Miễn phí)"):
-        st.markdown("""
-        1. Vào [Google AI Studio](https://aistudio.google.com/app/apikey)
-        2. Đăng nhập Gmail
-        3. Nhấn **Create API key**
-        4. Copy và dán vào ô trên
-        """)
     st.markdown("---")
-    st.caption("Ứng dụng vì cộng đồng 🌾")
+    st.markdown("Dự án Khoa học Kỹ thuật 2026<br>Mục tiêu: Chuyển đổi số Nông nghiệp vùng cao.", unsafe_allow_html=True)
 
 # =====================
-# 3. GIAO DIỆN CHÍNH
+# 3. HEADER ỨNG DỤNG
 # =====================
-st.markdown("<div class='main-title'>🌾 Trợ Lý Nông Nghiệp</div>", unsafe_allow_html=True)
-st.markdown("<div class='sub-title'>Hỏi đáp dịch bệnh (Việt - H’Mông - Thái)</div>", unsafe_allow_html=True)
+st.markdown("""
+<div class='app-header'>
+    <h1>🌱 Trợ Lý Nông Nghiệp</h1>
+    <p>Chẩn đoán bệnh cây trồng, vật nuôi bằng AI</p>
+</div>
+""", unsafe_allow_html=True)
 
 st.markdown("""
-<div class='warning-box'>
-    <b>⚠️ Lời dặn bà con:</b><br> 
-    Máy tính chỉ đoán bệnh dựa trên ảnh nên có thể chưa đúng 100%. Bà con xem để tham khảo, nếu thấy bệnh lây nhanh chết nhiều thì phải gọi báo ngay cho Trưởng bản hoặc Cán bộ thú y xã nhé!
+<div class='note-box'>
+    <b>👋 Lời ngỏ:</b> Ứng dụng hỗ trợ bà con tìm hiểu nhanh các loại bệnh nông nghiệp, có hỗ trợ đọc tiếng Thái và H'Mông. Lưu ý: Kết quả mang tính tham khảo, bà con cần theo dõi thực tế và báo cho cán bộ Khuyến nông/Thú y nếu bệnh nặng.
 </div>
 """, unsafe_allow_html=True)
 
 # ===============================
-# HÀM XỬ LÝ AI (Giữ nguyên logic)
+# HÀM XỬ LÝ (Giữ nguyên logic cực chuẩn của bạn)
 # ===============================
 def analyze_real_image(api_key, image, prompt):
-    if image.mode == "RGBA":
-        image = image.convert("RGB")
-
+    if image.mode == "RGBA": image = image.convert("RGB")
     buf = BytesIO()
     image.save(buf, format="JPEG")
     img_b64 = base64.b64encode(buf.getvalue()).decode()
@@ -87,134 +144,102 @@ def analyze_real_image(api_key, image, prompt):
     URL = f"https://generativelanguage.googleapis.com/v1/models/{MODEL}:generateContent?key={api_key}"
 
     payload = {
-        "contents": [{
-            "role": "user",
-            "parts": [
-                {"text": prompt},
-                {"inline_data": {"mime_type": "image/jpeg", "data": img_b64}}
-            ]
-        }]
+        "contents": [{"role": "user", "parts": [{"text": prompt}, {"inline_data": {"mime_type": "image/jpeg", "data": img_b64}}]}]
     }
-
     try:
         res = requests.post(URL, json=payload)
-        if res.status_code != 200:
-            return f"❌ Lỗi: {res.status_code} - {res.text}"
-
+        if res.status_code != 200: return f"❌ Lỗi: {res.status_code} - {res.text}"
         data = res.json()
-        if "candidates" not in data:
-            return "❌ Lỗi: Không nhận được câu trả lời từ AI."
-
+        if "candidates" not in data: return "❌ Lỗi: Không nhận được câu trả lời từ AI."
         return data["candidates"][0]["content"]["parts"][0]["text"]
+    except Exception as e: return f"❌ Mạng yếu hoặc lỗi kết nối: {str(e)}"
 
-    except Exception as e:
-        return f"❌ Mạng yếu hoặc lỗi kết nối: {str(e)}"
-
-# Hàm tạo âm thanh Text-to-Speech
 def generate_audio(text, lang_code):
     try:
         tts = gTTS(text=text, lang=lang_code)
         fp = BytesIO()
         tts.write_to_fp(fp)
         return fp.getvalue()
-    except ValueError:
-        # Nếu ngôn ngữ không được gTTS hỗ trợ (VD H'Mông đôi khi bị lỗi thư viện), dùng giọng Việt đọc phiên âm làm giải pháp thay thế
+    except:
         try:
             tts = gTTS(text=text, lang='vi') 
             fp = BytesIO()
             tts.write_to_fp(fp)
             return fp.getvalue()
-        except Exception as e:
-            return None
-    except Exception as e:
-        return None
+        except: return None
 
 # ===============================
-# KHU VỰC THAO TÁC CỦA BÀ CON
+# KHU VỰC THAO TÁC CỦA BÀ CON (GIAO DIỆN MỚI)
 # ===============================
-# BƯỚC 1: LẤY ẢNH
-st.markdown("<div class='step-header'>📸 Bước 1: Cho máy xem ảnh</div>", unsafe_allow_html=True)
-with st.container(border=True):
-    tab1, tab2 = st.tabs(["📷 Chụp ảnh mới", "🖼️ Chọn ảnh trong máy"])
-    
-    photo, upload = None, None
-    with tab1:
-        photo = st.camera_input("Bấm vào đây để chụp:")
-    with tab2:
-        upload = st.file_uploader("Bấm để chọn ảnh:", type=["png", "jpg", "jpeg"])
 
-    image = None
-    if photo:
-        image = Image.open(photo)
-    elif upload:
-        image = Image.open(upload)
-        
-    if image:
-        st.success("✅ Đã nhận được ảnh!")
-        with st.expander("👁️ Bấm để xem lại ảnh bà con vừa chọn"):
-            st.image(image, use_container_width=True)
+# BƯỚC 1: HÌNH ẢNH
+st.markdown("<div class='step-title'>📸 Bước 1: Cung cấp hình ảnh</div>", unsafe_allow_html=True)
+st.markdown("<div class='step-card'>", unsafe_allow_html=True)
+tab1, tab2 = st.tabs(["📷 Chụp ảnh trực tiếp", "🖼️ Tải ảnh từ thư viện"])
+photo, upload = None, None
+with tab1: photo = st.camera_input("Bấm vào đây để mở Camera:")
+with tab2: upload = st.file_uploader("Bấm để chọn ảnh có sẵn:", type=["png", "jpg", "jpeg"])
 
-# BƯỚC 2: MÔ TẢ & CHỌN NGÔN NGỮ
-st.markdown("<div class='step-header'>📝 Bước 2: Kể thêm & Chọn tiếng</div>", unsafe_allow_html=True)
-with st.container(border=True):
-    extra_info = st.text_area("Cây/con vật bị sao? (Bỏ ăn mấy ngày, héo từ gốc...)", 
-                              placeholder="Ví dụ: Gà rù gục đầu 2 ngày nay...",
-                              height=80)
-    
-    st.markdown("**Bà con muốn máy dịch và đọc tiếng gì? (Tiếng Việt luôn có sẵn)**")
-    col_lang1, col_lang2 = st.columns(2)
-    with col_lang1:
-        use_hmong = st.checkbox("🏔️ Tiếng H’Mông", value=True)
-    with col_lang2:
-        use_thai = st.checkbox("🇹🇭 Tiếng Thái", value=True)
+image = None
+if photo: image = Image.open(photo)
+elif upload: image = Image.open(upload)
 
-# BƯỚC 3: NÚT BẤM KẾT QUẢ
-st.markdown("<div class='step-header'>🚀 Bước 3: Xem kết quả & Nghe âm thanh</div>", unsafe_allow_html=True)
+if image:
+    st.success("✅ Ảnh đã được tải lên thành công!")
+    with st.expander("👁️ Xem trước hình ảnh"):
+        st.image(image, use_container_width=True)
+st.markdown("</div>", unsafe_allow_html=True)
 
-submit_btn = st.button("🔍 TÌM BỆNH & CÁCH CHỮA NGAY")
+
+# BƯỚC 2: THÔNG TIN & NGÔN NGỮ
+st.markdown("<div class='step-title'>📝 Bước 2: Thông tin & Ngôn ngữ</div>", unsafe_allow_html=True)
+st.markdown("<div class='step-card'>", unsafe_allow_html=True)
+extra_info = st.text_area("Bà con mô tả thêm tình trạng (nếu có):", 
+                          placeholder="Ví dụ: Gà ủ rũ 2 ngày, phân trắng... hoặc lúa bị vàng lá từ hôm qua...",
+                          height=80)
+
+st.markdown("**Chọn ngôn ngữ muốn máy đọc và dịch:** (Tiếng Việt luôn có sẵn)")
+col_lang1, col_lang2 = st.columns(2)
+with col_lang1: use_hmong = st.checkbox("🏔️ Tiếng H’Mông", value=True)
+with col_lang2: use_thai = st.checkbox("🇹🇭 Tiếng Thái", value=True)
+st.markdown("</div>", unsafe_allow_html=True)
+
+
+# BƯỚC 3: NÚT XỬ LÝ
+st.markdown("<br>", unsafe_allow_html=True)
+submit_btn = st.button("🚀 BẮT ĐẦU CHẨN ĐOÁN NGAY")
 
 # ===============================
-# XỬ LÝ & HIỂN THỊ KẾT QUẢ
+# XỬ LÝ KẾT QUẢ & ÂM THANH
 # ===============================
 if submit_btn:
     if not image:
-        st.error("❌ Bà con nhớ chụp hoặc chọn ảnh ở Bước 1 nhé!")
+        st.error("⚠️ Vui lòng chụp hoặc tải ảnh lên ở Bước 1!")
     elif not api_key:
-        st.error("❌ Cán bộ chưa nhập API Key ở thanh bên trái (Menu)!")
+        st.error("⚠️ Ban giám khảo/Kỹ thuật viên vui lòng nhập API Key ở Menu bên trái để chạy thử nghiệm!")
     else:
         st.markdown("---")
-        with st.spinner("⏳ Máy đang suy nghĩ và chuẩn bị giọng đọc, bà con chờ một chút nhé..."):
+        with st.spinner("⏳ Hệ thống AI đang phân tích hình ảnh và chuẩn bị giọng đọc. Vui lòng chờ vài giây..."):
             
             langs = ["Việt"]
             if use_hmong: langs.append("H’Mông")
             if use_thai: langs.append("Thái")
             lang_str = " – ".join(langs)
-            
             extra_prompt = f"\n- Lời kể của bà con: {extra_info}" if extra_info else ""
 
-            # Bổ sung các Thẻ [VI], [HMN], [TH] để Tách Text phát âm thanh
             prompt_text = fr"""
-Bạn là một kỹ sư nông nghiệp và bác sĩ thú y giàu kinh nghiệm, đặc biệt am hiểu thực tế làm nông ở vùng cao.
-Hãy quan sát kỹ bức ảnh và chẩn đoán bệnh, đưa ra lời khuyên theo phong cách DỄ HIỂU, GẦN GŨI VỚI BÀ CON NÔNG DÂN bằng ({lang_str}).{extra_prompt}
+Bạn là chuyên gia nông nghiệp và bác sĩ thú y vùng cao. Hãy quan sát ảnh và chẩn đoán bệnh, khuyên DỄ HIỂU bằng ({lang_str}).{extra_prompt}
 
-==============================
-⚠️ QUY TẮC AN TOÀN CHẨN ĐOÁN
-==============================
-- Nếu ảnh KHÔNG RÕ RÀNG hoặc KHÔNG PHẢI cây trồng/vật nuôi: Hãy nói thật là "Ảnh mờ quá, AI không nhìn rõ, bà con chụp lại nhé". TUYỆT ĐỐI KHÔNG đoán bừa.
-- Nếu bệnh có nhiều nguyên nhân: Hãy liệt kê các khả năng.
-- Luôn có câu chốt khuyên báo cho cán bộ thú y/khuyến nông xã.
-
-==========================
-3️⃣ LƯU Ý TRÌNH BÀY (BẮT BUỘC)
-==========================
-- Sử dụng từ ngữ mộc mạc, ngắn gọn. Tuyệt đối không dùng thuật ngữ học thuật.
-- BẮT BUỘC phải chia rõ nội dung theo cấu trúc các thẻ sau để hệ thống cắt lớp âm thanh:
+⚠️ QUY TẮC:
+- Nếu ảnh mờ/không đúng: Báo "Ảnh không rõ, vui lòng chụp lại". Không đoán bừa.
+- Luôn khuyên báo cán bộ xã.
+- Không dùng từ hàn lâm. BẮT BUỘC chia rõ các thẻ:
 [VI] 
-(Chỉ viết Tiếng Việt ở đây)
+(Nội dung tiếng Việt)
 [HMN] 
-(Chỉ viết Tiếng H'Mông ở đây - nếu có yêu cầu)
+(Nội dung H'Mông - nếu có)
 [TH] 
-(Chỉ viết Tiếng Thái ở đây - nếu có yêu cầu)
+(Nội dung Thái - nếu có)
 """
             result = analyze_real_image(api_key, image, prompt_text)
             
@@ -222,9 +247,9 @@ Hãy quan sát kỹ bức ảnh và chẩn đoán bệnh, đưa ra lời khuyên
                 st.error(result)
             else:
                 st.balloons()
-                st.success("📝 MÁY ĐÃ TÌM RA BỆNH! BÀ CON ĐỌC VÀ NGHE BÊN DƯỚI NHÉ:")
+                st.success("🎉 PHÂN TÍCH THÀNH CÔNG! MỜI BÀ CON XEM KẾT QUẢ:")
                 
-                # Tách văn bản để đọc âm thanh dựa vào các thẻ [VI], [HMN], [TH]
+                # Cắt văn bản
                 vi_match = re.search(r'\[VI\](.*?)(?=\[HMN\]|\[TH\]|$)', result, re.DOTALL)
                 hmn_match = re.search(r'\[HMN\](.*?)(?=\[TH\]|$)', result, re.DOTALL)
                 th_match = re.search(r'\[TH\](.*?)$', result, re.DOTALL)
@@ -233,56 +258,40 @@ Hãy quan sát kỹ bức ảnh và chẩn đoán bệnh, đưa ra lời khuyên
                 hmn_text = hmn_match.group(1).strip() if hmn_match else ""
                 th_text = th_match.group(1).strip() if th_match else ""
 
-                # Giao diện hiển thị văn bản (Loại bỏ các thẻ [VI], [HMN] cho đẹp mắt)
                 display_text = result.replace("[VI]", "🇻🇳 **Tiếng Việt:**\n").replace("[HMN]", "\n---\n🏔️ **Tiếng H'Mông:**\n").replace("[TH]", "\n---\n🇹🇭 **Tiếng Thái:**\n")
                 
-                with st.container(border=True):
-                    st.markdown(display_text)
+                # In kết quả
+                st.markdown("<div class='step-card' style='border-top: 4px solid #4caf50;'>", unsafe_allow_html=True)
+                st.markdown(display_text)
+                st.markdown("</div>", unsafe_allow_html=True)
                 
-                # KHU VỰC PHÁT ÂM THANH
-                st.markdown("<div class='step-header' style='background-color:#e3f2fd; color:#1565c0; border-left-color:#1976d2;'>🔊 Nghe máy đọc kết quả</div>", unsafe_allow_html=True)
-                
-                # Đọc Tiếng H'Mông
+                # Phát âm thanh
+                st.markdown("<div class='step-title'>🔊 Nghe máy đọc kết quả</div>", unsafe_allow_html=True)
+                st.markdown("<div class='step-card'>", unsafe_allow_html=True)
                 if use_hmong and hmn_text:
-                    st.write("🏔️ **Phát âm Tiếng H'Mông:**")
-                    # Dùng mã 'hmn' hoặc fallback
+                    st.write("🏔️ **Giọng H'Mông:**")
                     audio_hmn = generate_audio(hmn_text, 'hmn')
-                    if audio_hmn:
-                        st.audio(audio_hmn, format="audio/mp3")
-                    else:
-                        st.warning("⚠️ Giọng đọc H'Mông hiện đang bảo trì, bà con đọc chữ tạm nhé!")
+                    if audio_hmn: st.audio(audio_hmn, format="audio/mp3")
                 
-                # Đọc Tiếng Thái
                 if use_thai and th_text:
-                    st.write("🇹🇭 **Phát âm Tiếng Thái:**")
+                    st.write("🇹🇭 **Giọng Thái:**")
                     audio_th = generate_audio(th_text, 'th')
-                    if audio_th:
-                        st.audio(audio_th, format="audio/mp3")
-                    else:
-                        st.warning("⚠️ Không tải được giọng đọc tiếng Thái lúc này.")
+                    if audio_th: st.audio(audio_th, format="audio/mp3")
+                st.markdown("</div>", unsafe_allow_html=True)
 
-                # Lưu vào lịch sử
-                timestamp = datetime.now().strftime("%d/%m/%Y %H:%M")
-                st.session_state.history.insert(0, {"time": timestamp, "result": display_text, "info": extra_info})
+                # Lưu lịch sử
+                st.session_state.history.insert(0, {"time": datetime.now().strftime("%d/%m/%Y %H:%M"), "result": display_text})
                 
-                # Nút tải về 
+                # Nút tải
                 st.markdown("<div class='download-btn'>", unsafe_allow_html=True)
-                st.download_button(
-                    label="📥 Lưu kết quả này vào điện thoại",
-                    data=display_text,
-                    file_name=f"Don_Thuoc_AI_{datetime.now().strftime('%Y%m%d_%H%M')}.txt",
-                    mime="text/plain"
-                )
+                st.download_button("📥 Tải bản chẩn đoán này về máy", display_text, f"DonThuoc_{datetime.now().strftime('%Y%m%d_%H%M')}.txt")
                 st.markdown("</div>", unsafe_allow_html=True)
 
 # ===============================
-# LỊCH SỬ KHÁM BỆNH
+# LỊCH SỬ BÊN DƯỚI
 # ===============================
 if st.session_state.history:
-    st.markdown("---")
-    st.markdown("<div class='step-header' style='background-color:#fff3e0; color:#e65100; border-left-color:#ff9800;'>🕒 Các lần hỏi trước</div>", unsafe_allow_html=True)
-    for i, item in enumerate(st.session_state.history[:3]):
-        with st.expander(f"📌 Bệnh án lúc: {item['time']}"):
-            if item['info']:
-                st.caption(f"**Bà con đã kể:** {item['info']}")
+    st.markdown("<br><div class='step-title' style='color:#f57c00; border-bottom: 2px solid #ffe0b2;'>🕒 Lịch sử khám bệnh hôm nay</div>", unsafe_allow_html=True)
+    for item in st.session_state.history[:3]:
+        with st.expander(f"📌 Chẩn đoán lúc: {item['time']}"):
             st.markdown(item['result'])
