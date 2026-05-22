@@ -10,9 +10,9 @@ from gtts import gTTS
 # =====================
 # 1. CẤU HÌNH TRANG TỐI ƯU
 # =====================
-st.set_page_config(page_title="Trợ Lý Nông Nghiệp", page_icon="🌱", layout="centered", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="Trợ Lý Nông Nghiệp Bản Làng", page_icon="🌱", layout="centered", initial_sidebar_state="collapsed")
 
-# TÍCH HỢP CSS NÂNG CAO (GIAO DIỆN CHUYÊN NGHIỆP)
+# TÍCH HỢP CSS NÂNG CAO
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap');
@@ -48,21 +48,21 @@ with st.sidebar:
     st.caption("Dành riêng cho ban tổ chức/kỹ thuật viên nhập API Key của Google.")
     api_key = st.text_input("🔑 Google API Key:", type="password")
     st.markdown("---")
-    st.markdown("Dự án Khoa học Kỹ thuật<br>Mục tiêu: Chuyển đổi số Nông nghiệp vùng cao.", unsafe_allow_html=True)
+    st.markdown("<b>Dự án dự thi Sáng tạo Thanh thiếu niên, Nhi đồng</b><br>Mục tiêu: Chuyển đổi số Nông nghiệp vùng cao.", unsafe_allow_html=True)
 
 # =====================
 # 3. HEADER ỨNG DỤNG
 # =====================
 st.markdown("""
 <div class='app-header'>
-    <h1>🌱 Trợ Lý Nông Nghiệp</h1>
+    <h1>🌱 Trợ Lý Nông Nghiệp Bản Làng</h1>
     <p>Chẩn đoán bệnh cây trồng, vật nuôi bằng AI</p>
 </div>
 """, unsafe_allow_html=True)
 
 st.markdown("""
 <div class='note-box'>
-    <b>👋 Lời ngỏ:</b> Ứng dụng hỗ trợ bà con chẩn đoán nhanh dịch bệnh (Hỗ trợ đọc tiếng Thái và H'Mông). 
+    <b>👋 Lời ngỏ:</b> Ứng dụng hỗ trợ bà con chẩn đoán nhanh dịch bệnh (Hỗ trợ đọc tiếng Phổ thông, tiếng Thái và H'Mông). 
     <br><i>Lưu ý: Kết quả mang tính tham khảo bước đầu, bà con cần báo cho cán bộ Khuyến nông/Thú y nếu bệnh diễn biến nặng!</i>
 </div>
 """, unsafe_allow_html=True)
@@ -110,10 +110,12 @@ st.markdown("</div>", unsafe_allow_html=True)
 st.markdown("<div class='step-title'>📝 Bước 2: Thông tin & Ngôn ngữ</div>", unsafe_allow_html=True)
 st.markdown("<div class='step-card'>", unsafe_allow_html=True)
 extra_info = st.text_area("Bà con mô tả thêm tình trạng (nếu có):", placeholder="Ví dụ: Lợn bỏ ăn 2 ngày, sốt cao... hoặc lúa bị vàng lá...", height=80)
-st.markdown("**Chọn ngôn ngữ muốn máy đọc và dịch:** (Tiếng Việt luôn có sẵn)")
-col_lang1, col_lang2 = st.columns(2)
-with col_lang1: use_hmong = st.checkbox("🏔️ Tiếng H’Mông", value=True)
-with col_lang2: use_thai = st.checkbox("🇹🇭 Tiếng Thái", value=True)
+
+st.markdown("**Chọn ngôn ngữ muốn máy đọc và dịch:**")
+col_lang1, col_lang2, col_lang3 = st.columns(3)
+with col_lang1: use_vi = st.checkbox("🇻🇳 Tiếng Việt", value=True, disabled=True, help="Mặc định luôn có Tiếng Phổ thông")
+with col_lang2: use_hmong = st.checkbox("🏔️ Tiếng H’Mông", value=True)
+with col_lang3: use_thai = st.checkbox("🇹🇭 Tiếng Thái", value=True)
 st.markdown("</div>", unsafe_allow_html=True)
 
 # BƯỚC 3: XỬ LÝ
@@ -132,7 +134,6 @@ if submit_btn:
             lang_str = " – ".join(langs)
             extra_prompt = f"\n- Lời kể của bà con: {extra_info}" if extra_info else ""
 
-            # PROMPT ĐÃ TÍCH HỢP HỌC LIỆU
             prompt_text = fr"""
 Bạn là chuyên gia nông nghiệp và bác sĩ thú y đang công tác tại vùng núi Tây Bắc (Điện Biên). Hãy quan sát ảnh và chẩn đoán bệnh, khuyên DỄ HIỂU, GẦN GŨI bằng ({lang_str}).{extra_prompt}
 
@@ -175,15 +176,24 @@ Không dùng từ hàn lâm. BẮT BUỘC chia rõ các thẻ:
                 st.markdown("<div class='step-title'>🔊 Nghe máy đọc kết quả</div>", unsafe_allow_html=True)
                 st.markdown("<div class='step-card'>", unsafe_allow_html=True)
                 
-                # Âm thanh H'Mông
+                # Âm thanh Tiếng Việt (Phổ thông)
+                if vi_text:
+                    st.write("🇻🇳 **Giọng Tiếng Phổ thông:**")
+                    # Lọc bỏ các dấu markdown (*, #) để máy đọc tự nhiên, không bị vấp
+                    clean_vi = vi_text.replace('*', '').replace('#', '')
+                    audio_vi = generate_audio(clean_vi, 'vi')
+                    if audio_vi: st.audio(audio_vi, format="audio/mp3")
+
+                # Âm thanh Tiếng H'Mông
                 if use_hmong and hmn_text:
                     st.write("🏔️ **Giọng H'Mông:**")
                     st.info("💡 **Ghi chú kỹ thuật:** Hiện tại hệ thống AI toàn cầu chưa hỗ trợ phát âm tiếng H'Mông chuẩn. Nhóm tác giả đang lên kế hoạch thu âm giọng người bản địa để cập nhật tính năng đọc tự động trong phiên bản tiếp theo!")
                 
-                # Âm thanh Thái
+                # Âm thanh Tiếng Thái
                 if use_thai and th_text:
                     st.write("🇹🇭 **Giọng Thái:**")
-                    audio_th = generate_audio(th_text, 'th')
+                    clean_th = th_text.replace('*', '').replace('#', '')
+                    audio_th = generate_audio(clean_th, 'th')
                     if audio_th: st.audio(audio_th, format="audio/mp3")
                 st.markdown("</div>", unsafe_allow_html=True)
 
@@ -200,20 +210,22 @@ if st.session_state.history:
         with st.expander(f"📌 Chẩn đoán lúc: {item['time']}"): st.markdown(item['result'])
 
 # ===============================
-# 4. THÔNG TIN DỰ ÁN & HỌC LIỆU (Dành cho BGK)
+# 4. THÔNG TIN DỰ ÁN & HỌC LIỆU
 # ===============================
 st.markdown("<br><br>", unsafe_allow_html=True)
-with st.expander("ℹ️ Nguồn Học liệu & Tuyên bố Đạo đức AI (Dành cho Hội đồng Giám khảo)"):
+with st.expander("ℹ️ Thông tin dự án (Dành cho Hội đồng Giám khảo)"):
     st.markdown("""
     <div class='reference-box'>
-        <b>1. Tính minh bạch của Nguồn học liệu:</b><br>
-        Ứng dụng không sử dụng tri thức AI trôi nổi mà được thiết lập "Kỹ sư câu lệnh - Prompt Engineering" để đối chiếu và ưu tiên dựa trên 3 nguồn chính thống:
+        <b>🎯 1. Tính mới & Sáng tạo của mô hình:</b><br>
+        Lần đầu tiên ứng dụng AI tạo sinh (Generative AI) được tùy biến riêng cho nông nghiệp vùng cao. Ứng dụng phá vỡ rào cản ngôn ngữ bằng cách hỗ trợ dịch và đọc tự động Tiếng Thái, Tiếng H'Mông, giúp đồng bào dân tộc thiểu số dễ dàng tiếp cận khoa học kỹ thuật.
+        <br><br>
+        <b>⚙️ 2. Khả năng áp dụng thực tiễn:</b><br>
+        Ứng dụng chạy mượt mà trên nền tảng Web/Điện thoại thông minh mà không cần cài đặt phức tạp. Dữ liệu bệnh được đối chiếu trực tiếp từ các nguồn uy tín:
         <ul>
-            <li><b>Nguồn Quốc gia:</b> Dữ liệu phác đồ điều trị từ <a href='http://www.khuyennongvn.gov.vn/' target='_blank' style='color: #1976d2; text-decoration: none;'><b>Trung tâm Khuyến nông Quốc gia</b></a> và <a href='http://cucthuy.gov.vn/' target='_blank' style='color: #1976d2; text-decoration: none;'><b>Cục Thú y Việt Nam</b></a>.</li>
-            <li><b>Nguồn Địa phương:</b> Đặc thù khí hậu và cẩm nang dịch bệnh nông nghiệp từ <a href='https://sonongnghiep.dienbien.gov.vn/' target='_blank' style='color: #1976d2; text-decoration: none;'><b>Sở Nông nghiệp & PTNT tỉnh Điện Biên</b></a>.</li>
-            <li><b>Kiểm chứng Thực tiễn:</b> Tham vấn trực tiếp từ cán bộ Khuyến nông/Thú y cấp xã để đảm bảo bài thuốc dân gian và cách ly phù hợp với bà con bản địa.</li>
+            <li><a href='http://www.khuyennongvn.gov.vn/' target='_blank' style='color: #1976d2; text-decoration: none;'><b>Trung tâm Khuyến nông Quốc gia</b></a> & <a href='http://cucthuy.gov.vn/' target='_blank' style='color: #1976d2; text-decoration: none;'><b>Cục Thú y Việt Nam</b></a>.</li>
+            <li>Sổ tay dịch bệnh nông nghiệp từ <a href='https://sonongnghiep.dienbien.gov.vn/' target='_blank' style='color: #1976d2; text-decoration: none;'><b>Sở Nông nghiệp & PTNT tỉnh Điện Biên</b></a>.</li>
         </ul>
-        <b>2. Tuyên bố Đạo đức (AI Ethics):</b><br>
-        AI được lập trình với bộ lọc an toàn tuyệt đối: Khước từ chẩn đoán khi ảnh mờ/không đúng chủ đề, cung cấp gợi ý mở thay vì khẳng định 100%, và <b>luôn yêu cầu người dân báo cáo sự việc cho cán bộ chức năng</b>. Ứng dụng đóng vai trò "Trợ lý số sơ cấp", không thay thế chuyên gia y tế thú y.
+        <b>🌍 3. Hiệu quả kinh tế - xã hội (Đạo đức AI):</b><br>
+        Ứng dụng đóng vai trò "sơ cấp cứu thông tin", không thay thế bác sĩ thú y mà <b>khuyên người dân báo cáo cho cán bộ chức năng</b>. Điều này giúp ngăn chặn dịch bệnh bùng phát sớm, giảm thiểu thiệt hại kinh tế cho bà con nông dân và thúc đẩy quá trình chuyển đổi số nông thôn mới.
     </div>
     """, unsafe_allow_html=True)
