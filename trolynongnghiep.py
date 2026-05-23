@@ -38,28 +38,41 @@ st.markdown("""
 if "history" not in st.session_state: st.session_state.history = []
 
 # =====================
-# 2. CƠ SỞ DỮ LIỆU RAG (ĐƯỢC CẤU TRÚC LẠI THEO CHUẨN THÚ Y)
+# 2. CƠ SỞ DỮ LIỆU RAG (MỞ RỘNG CẢ CÂY TRỒNG & VẬT NUÔI)
 # =====================
 RAG_KNOWLEDGE_BASE = """
-[QUY TRÌNH XỬ LÝ DỊCH BỆNH CHUẨN - CHI CỤC THÚ Y & BVTV]
-* NGUYÊN TẮC CHUNG: "Phát hiện sớm - Cách ly ngay - Xử lý dứt điểm - Báo cáo nhanh".
+[QUY TRÌNH XỬ LÝ CHUẨN - CHI CỤC THÚ Y & BẢO VỆ THỰC VẬT ĐIỆN BIÊN 2026]
+* NGUYÊN TẮC CHUNG: "Phát hiện sớm - Xử lý kịp thời - Báo cáo nhanh".
 
+--- PHẦN 1: VẬT NUÔI (GIA SÚC, GIA CẦM) ---
 1. BỆNH DỊCH TẢ LỢN CHÂU PHI (ASF):
-- Triệu chứng lâm sàng: Sốt cao, xuất huyết lốm đốm đỏ/tím ở tai, mõm, bẹn. Lợn ủ rũ, bỏ ăn. Tỷ lệ chết 100%.
-- Phác đồ: KHÔNG CÓ THUỐC CHỮA.
-- Xử lý 4 bước: (1) Cách ly tuyệt đối con ốm; (2) Không bán chạy, không mổ thịt; (3) Báo ngay trạm thú y xã để tiêu hủy chôn lấp với vôi bột; (4) Rắc vôi bột, phun sát trùng toàn bộ chuồng trại liên tục 7 ngày.
+- Triệu chứng: Sốt cao, xuất huyết đốm đỏ/tím ở tai, mõm, bẹn. Bỏ ăn. Tỷ lệ chết 100%.
+- Xử lý: KHÔNG CÓ THUỐC CHỮA. Cách ly tuyệt đối, báo chính quyền tiêu hủy. Rắc vôi bột chuồng trại.
 
 2. BỆNH LỞ MỒM LONG MÓNG (Trâu/Bò/Lợn):
-- Triệu chứng lâm sàng: Sốt, nổi mụn nước ở niêm mạc miệng, vành móng, vú. Chảy dãi nhiều, đi lại khó khăn.
-- Phác đồ & Xử lý: (1) Cách ly khỏi đàn khỏe; (2) Xử lý vết thương: Rửa bằng dung dịch phèn chua 2%, cồn I-ốt hoặc nước chanh, khế. Bôi thuốc Xanh Methylene; (3) Dinh dưỡng: Cho ăn thức ăn mềm (cháo loãng), bổ sung Vitamin C tăng đề kháng; (4) Báo cáo kiểm dịch.
+- Triệu chứng: Nổi mụn nước ở miệng, vành móng. Chảy dãi, đi lại khó khăn.
+- Xử lý: Rửa vết thương bằng phèn chua 2% hoặc nước chanh, bôi thuốc Xanh Methylene. Báo cáo kiểm dịch.
 
-3. BỆNH TỤ HUYẾT TRÙNG (Lợn/Gia cầm):
-- Triệu chứng lâm sàng: Bệnh ghép, khó thở, tụ huyết thâm tím ở vùng hầu họng, tích nước. Phân lỏng.
-- Phác đồ & Xử lý: (1) Cách ly; (2) Tiêm kháng sinh Enrofloxacin 10% hoặc Amoxicillin kết hợp thuốc trợ lực Vitamin B-Complex; (3) Tiêu độc sát trùng chuồng trại; (4) Khuyên tiêm phòng vaccine định kỳ cho toàn đàn.
+3. BỆNH TỤ HUYẾT TRÙNG (Gia cầm/Lợn):
+- Triệu chứng: Tụ huyết thâm tím hầu họng, phân lỏng, khó thở.
+- Xử lý: Tiêm/uống kháng sinh Enrofloxacin 10% hoặc Amoxicillin. Tiêu độc chuồng trại.
 
-4. BỆNH ĐẠO ÔN TRÊN LÚA (Bảo vệ thực vật):
-- Triệu chứng lâm sàng: Lá lúa xuất hiện vết chấm nhỏ, sau lan rộng hình thoi (mắt én), tâm màu xám tro, viền nâu đậm.
-- Phác đồ & Xử lý: (1) Lập tức ngừng bón phân đạm (Urê); (2) Giữ mực nước trong ruộng; (3) Phun thuốc đặc trị có hoạt chất Tricyclazole hoặc Isoprothiolane. Phun 2 lần cách nhau 5-7 ngày.
+--- PHẦN 2: CÂY TRỒNG (LÚA, HOA MÀU, CÂY ĂN QUẢ) ---
+4. BỆNH ĐẠO ÔN TRÊN LÚA:
+- Triệu chứng: Lá xuất hiện vết chấm nhỏ hình thoi (mắt én), tâm xám tro, viền nâu đậm.
+- Xử lý: Ngừng bón phân đạm (Urê). Giữ mực nước ruộng. Phun thuốc hoạt chất Tricyclazole hoặc Isoprothiolane.
+
+5. SÂU CUỐN LÁ NHỎ HẠI LÚA:
+- Triệu chứng: Lá lúa bị cuốn dọc thành ống, sâu non ăn mô lá để lại lớp biểu bì trắng.
+- Xử lý: Vệ sinh đồng ruộng. Phun thuốc nội hấp (Indoxacarb, Chlorantraniliprole) khi sâu non mới nở.
+
+6. BỆNH SƯƠNG MAI / THÁN THƯ (Rau màu, Cà chua, Cây ăn quả):
+- Triệu chứng: Đốm nâu sẫm trên lá, quả thối nhũn hoặc khô teo lại, phát triển mạnh vào mùa sương mù/ẩm.
+- Xử lý: Tỉa cành thông thoáng. Phun thuốc gốc Đồng (Copper Oxychloride) hoặc Mancozeb. Không phun khi trời sắp mưa.
+
+7. ỨNG PHÓ SƯƠNG MUỐI/RÉT ĐẬM (Đặc thù Tây Bắc):
+- Cây trồng: Tưới nước rửa sương vào sáng sớm, tủ gốc bằng rơm rạ, tro bếp giữ ấm.
+- Vật nuôi: Che chắn chuồng trại, đốt trấu sưởi ấm, cho uống nước ấm có pha muối.
 """
 
 # =====================
@@ -86,21 +99,21 @@ with st.sidebar:
 st.markdown("""
 <div class='app-header'>
     <h1>🌱 Trợ Lý Nông Nghiệp Bản Làng</h1>
-    <p>Chẩn đoán dịch bệnh & Phác đồ xử lý chuẩn</p>
+    <p>Chẩn đoán Vật nuôi & Cây trồng tích hợp hệ thống RAG</p>
 </div>
 """, unsafe_allow_html=True)
 
 st.markdown("""
 <div class='rag-status'>
-    <span>🟢 CSDL RAG: Đã đồng bộ Phác đồ chuẩn Thú y/BVTV 2026</span>
+    <span>🟢 CSDL RAG: Đã đồng bộ Phác đồ Thú y & Bảo vệ Thực vật 2026</span>
     <span>Bảo mật: Xác thực</span>
 </div>
 """, unsafe_allow_html=True)
 
 st.markdown("""
 <div class='note-box'>
-    <b>👋 Lời ngỏ:</b> Ứng dụng hỗ trợ bà con chẩn đoán nhanh dịch bệnh (Phát âm Phổ thông, dịch tiếng Thái và H'Mông). 
-    <br><i>Lưu ý: Phác đồ chỉ mang tính chất sơ cứu, bà con cần báo cho cán bộ chuyên môn để được can thiệp sâu!</i>
+    <b>👋 Lời ngỏ:</b> Ứng dụng hỗ trợ bà con chẩn đoán nhanh dịch bệnh thực vật và động vật (Phát âm Phổ thông, dịch tiếng Thái và H'Mông). 
+    <br><i>Lưu ý: Phác đồ chỉ mang tính chất sơ cứu, bà con cần báo cho Trạm Khuyến nông/Thú y để can thiệp sâu!</i>
 </div>
 """, unsafe_allow_html=True)
 
@@ -129,7 +142,7 @@ def generate_audio(text, lang_code):
     except: return None
 
 # BƯỚC 1: HÌNH ẢNH
-st.markdown("<div class='step-title'>📸 Bước 1: Cung cấp hình ảnh & Triệu chứng</div>", unsafe_allow_html=True)
+st.markdown("<div class='step-title'>📸 Bước 1: Cung cấp hình ảnh (Cây trồng / Vật nuôi)</div>", unsafe_allow_html=True)
 st.markdown("<div class='step-card'>", unsafe_allow_html=True)
 tab1, tab2 = st.tabs(["📷 Chụp ảnh trực tiếp", "🖼️ Tải ảnh từ thư viện"])
 photo, upload = None, None
@@ -142,7 +155,7 @@ if image:
     st.success("✅ Ảnh đã được trích xuất dữ liệu thành công!")
     with st.expander("👁️ Xem trước hình ảnh"): st.image(image, use_container_width=True)
 
-extra_info = st.text_area("Bà con mô tả thêm tình trạng lâm sàng (nếu có):", placeholder="Ví dụ: Bỏ ăn 2 ngày, sốt cao, đi ngoài phân lỏng...", height=80)
+extra_info = st.text_area("Bà con mô tả thêm tình trạng (nếu có):", placeholder="Ví dụ: Lá úa vàng từ gốc, rụng quả non... hoặc Gà bỏ ăn, ủ rũ...", height=80)
 st.markdown("</div>", unsafe_allow_html=True)
 
 # BƯỚC 2: NGÔN NGỮ ĐỊA PHƯƠNG
@@ -163,16 +176,16 @@ if submit_btn:
     elif not api_key: st.error("⚠️ Lỗi hệ thống: Chưa nhập API Key ở Menu!")
     else:
         st.markdown("---")
-        with st.spinner("⏳ Đang quét dấu hiệu lâm sàng và đối chiếu với CSDL Y tế/Nông nghiệp Điện Biên..."):
+        with st.spinner("⏳ Đang quét dấu hiệu thực tế và đối chiếu với CSDL Y tế/Nông nghiệp Điện Biên..."):
             langs = ["Tiếng Phổ Thông"]
             if use_hmong: langs.append("Tiếng dân tộc H’Mông")
             if use_thai: langs.append("Tiếng dân tộc Thái (Tây Bắc Việt Nam)")
             lang_str = " – ".join(langs)
-            extra_prompt = f"\n- Lời kể lâm sàng của bà con: {extra_info}" if extra_info else ""
+            extra_prompt = f"\n- Lời kể thực tế của bà con: {extra_info}" if extra_info else ""
 
-            # PROMPT CHUYÊN GIA: Ép AI trả lời theo cấu trúc y khoa chuẩn
+            # PROMPT CHUYÊN GIA (CẢ VẬT NUÔI VÀ CÂY TRỒNG)
             prompt_text = fr"""
-Bạn là một kỹ sư nông nghiệp và bác sĩ thú y giàu kinh nghiệm. Hãy phân tích ảnh và triệu chứng để lập hồ sơ bệnh án.
+Bạn là một Kỹ sư Nông nghiệp (Trồng trọt) và Bác sĩ Thú y (Chăn nuôi) giàu kinh nghiệm. Hãy phân tích ảnh và tình trạng để lập hồ sơ bệnh án.
 
 [TÀI LIỆU KIỂM CHỨNG - KNOWLEDGE BASE]
 {RAG_KNOWLEDGE_BASE}
@@ -180,16 +193,16 @@ Bạn là một kỹ sư nông nghiệp và bác sĩ thú y giàu kinh nghiệm.
 
 ⚠️ QUY TẮC RAG & TRÌNH BÀY (BẮT BUỘC):
 1. Bạn PHẢI đối chiếu với [TÀI LIỆU KIỂM CHỨNG] và trả lời chính xác theo cấu trúc 4 phần sau cho mỗi ngôn ngữ:
-   - 🔍 **Dấu hiệu nhận biết:** (Bạn thấy gì từ ảnh và lời kể?)
-   - 🩺 **Chẩn đoán sơ bộ:** (Kết luận tên bệnh/vấn đề là gì?)
-   - 📋 **Phác đồ xử lý chuẩn:** (Viết rõ từng bước: Cách ly/Vệ sinh môi trường -> Can thiệp y tế/Dùng thuốc -> Chăm sóc phục hồi dựa trên tài liệu chuẩn).
-   - 🚨 **Khuyến cáo dịch tễ:** (Bắt buộc dặn báo cáo cán bộ địa phương).
-2. Tuyệt đối không tự bịa ra tên thuốc kháng sinh ngoài danh mục trên. Nếu không rõ bệnh, hãy yêu cầu báo ngay cán bộ.
+   - 🔍 **Dấu hiệu nhận biết:** (Quan sát thấy bệnh gì trên cây/con vật từ ảnh và lời kể?)
+   - 🩺 **Chẩn đoán sơ bộ:** (Tên bệnh hoặc loại sâu/côn trùng phá hoại là gì?)
+   - 📋 **Phác đồ xử lý chuẩn:** (Viết rõ từng bước: Biện pháp canh tác/cách ly -> Dùng phân bón/thuốc bảo vệ thực vật/thú y y như tài liệu chuẩn).
+   - 🚨 **Khuyến cáo:** (Bắt buộc dặn báo cáo cán bộ Nông nghiệp/Thú y địa phương).
+2. Tuyệt đối không tự bịa ra tên thuốc hoặc hóa chất ngoài danh mục. Nếu không rõ, hãy yêu cầu báo ngay cán bộ.
 3. Văn phong dễ hiểu, gần gũi với bà con bản làng. Dịch ra ({lang_str}). Dùng phiên âm Latinh cho tiếng dân tộc.{extra_prompt}
 
 ⚠️ BẮT BUỘC CHIA THẺ ĐỂ CẮT LỚP ÂM THANH:
 [VI] 
-(Nội dung Tiếng Phổ Thông theo cấu trúc 4 phần)
+(Nội dung Tiếng Phổ Thông)
 [HMN] 
 (Nội dung Tiếng H'Mông - nếu có)
 [TH] 
@@ -200,7 +213,7 @@ Bạn là một kỹ sư nông nghiệp và bác sĩ thú y giàu kinh nghiệm.
             if result.startswith("❌"): st.error(result)
             else:
                 st.balloons()
-                st.success("🎉 HỒ SƠ BỆNH ÁN SƠ BỘ ĐÃ ĐƯỢC THIẾT LẬP:")
+                st.success("🎉 HỒ SƠ CHẨN ĐOÁN SƠ BỘ ĐÃ ĐƯỢC THIẾT LẬP:")
                 
                 vi_match = re.search(r'\[VI\](.*?)(?=\[HMN\]|\[TH\]|$)', result, re.DOTALL)
                 hmn_match = re.search(r'\[HMN\](.*?)(?=\[TH\]|$)', result, re.DOTALL)
@@ -217,21 +230,21 @@ Bạn là một kỹ sư nông nghiệp và bác sĩ thú y giàu kinh nghiệm.
                 st.markdown("</div>", unsafe_allow_html=True)
                 
                 # NÚT GỌI ĐIỆN THOẠI KHẨN CẤP
-                st.markdown("<div class='step-title' style='color:#c62828; border-bottom: 2px solid #ffcdd2;'>📞 Báo cáo Cán bộ Thú y/Khuyến nông Khẩn cấp</div>", unsafe_allow_html=True)
+                st.markdown("<div class='step-title' style='color:#c62828; border-bottom: 2px solid #ffcdd2;'>📞 Liên hệ Cán bộ Nông nghiệp / Thú y Khẩn cấp</div>", unsafe_allow_html=True)
                 st.markdown("<div class='step-card' style='background-color: #ffebee;'>", unsafe_allow_html=True)
                 st.markdown("Chọn địa bàn để lấy số liên hệ cán bộ phụ trách (Bản Demo):")
                 dia_phuong = st.selectbox("Chọn địa phương:", 
                                          ["Phường Mường Thanh", "Xã Thanh Xương", "Xã Mường Phăng"], label_visibility="collapsed")
                 
                 if dia_phuong == "Phường Mường Thanh":
-                    st.markdown("👨‍⚕️ Cán bộ: **Nguyễn Văn A** | 📞 **0912.345.678**")
-                    st.markdown("<a href='tel:0912345678'><button style='background-color:#c62828; color:white; padding:8px 15px; border-radius:8px; border:none; font-weight:bold; width:100%;'>☎ Bấm để gọi cấp cứu nông nghiệp</button></a>", unsafe_allow_html=True)
+                    st.markdown("👨‍🌾 Cán bộ: **Nguyễn Văn A** (Khuyến nông & Thú y) | 📞 **0912.345.678**")
+                    st.markdown("<a href='tel:0912345678'><button style='background-color:#c62828; color:white; padding:8px 15px; border-radius:8px; border:none; font-weight:bold; width:100%;'>☎ Bấm để gọi Hỗ trợ Nông nghiệp</button></a>", unsafe_allow_html=True)
                 elif dia_phuong == "Xã Thanh Xương":
-                    st.markdown("👨‍⚕️ Cán bộ: **Lò Văn B** | 📞 **0988.777.666**")
-                    st.markdown("<a href='tel:0988777666'><button style='background-color:#c62828; color:white; padding:8px 15px; border-radius:8px; border:none; font-weight:bold; width:100%;'>☎ Bấm để gọi cấp cứu nông nghiệp</button></a>", unsafe_allow_html=True)
+                    st.markdown("👨‍🌾 Cán bộ: **Lò Văn B** (Khuyến nông & Thú y) | 📞 **0988.777.666**")
+                    st.markdown("<a href='tel:0988777666'><button style='background-color:#c62828; color:white; padding:8px 15px; border-radius:8px; border:none; font-weight:bold; width:100%;'>☎ Bấm để gọi Hỗ trợ Nông nghiệp</button></a>", unsafe_allow_html=True)
                 else:
-                    st.markdown("👩‍⚕️ Cán bộ: **Lường Thị C** | 📞 **0215.3123.456**")
-                    st.markdown("<a href='tel:02153123456'><button style='background-color:#c62828; color:white; padding:8px 15px; border-radius:8px; border:none; font-weight:bold; width:100%;'>☎ Bấm để gọi cấp cứu nông nghiệp</button></a>", unsafe_allow_html=True)
+                    st.markdown("👩‍🌾 Cán bộ: **Lường Thị C** (Khuyến nông & Thú y) | 📞 **0215.3123.456**")
+                    st.markdown("<a href='tel:02153123456'><button style='background-color:#c62828; color:white; padding:8px 15px; border-radius:8px; border:none; font-weight:bold; width:100%;'>☎ Bấm để gọi Hỗ trợ Nông nghiệp</button></a>", unsafe_allow_html=True)
                 st.markdown("</div>", unsafe_allow_html=True)
 
                 st.markdown("<div class='step-title'>🔊 Nghe máy đọc phác đồ</div>", unsafe_allow_html=True)
@@ -270,13 +283,13 @@ with st.expander("ℹ️ Tuyên bố Kỹ thuật & Đạo đức AI (Dành cho 
         <b>🔬 1. Công nghệ Lõi - Hệ thống RAG (Retrieval-Augmented Generation):</b><br>
         Để giải quyết triệt để vấn đề "Ảo giác AI" (Hallucination - AI tự bịa thông tin y khoa), dự án áp dụng kỹ thuật RAG và Prompt Engineering nghiêm ngặt: 
         <ul>
-            <li>Hệ thống được tích hợp sẵn <b>Cơ sở dữ liệu (Knowledge Base)</b> mô phỏng các phác đồ từ <i>Cục Thú y</i>.</li>
+            <li>Hệ thống được tích hợp sẵn <b>Cơ sở dữ liệu (Knowledge Base)</b> mô phỏng các phác đồ từ <i>Chi cục Thú y & Bảo vệ thực vật</i>.</li>
             <li>Khi nhận dữ liệu, AI <b>bắt buộc phải xuất ra hồ sơ theo chuẩn 4 phần</b> (Dấu hiệu -> Chẩn đoán -> Phác đồ chuẩn -> Khuyến cáo). Nếu bệnh không có trong danh mục, AI từ chối bốc thuốc.</li>
         </ul>
         <b>🚀 2. Chuỗi hành động khép kín (Closed-loop Action):</b><br>
-        Ứng dụng không chỉ dừng ở việc "tra cứu". Chúng em thiết kế quy trình khép kín: <i>Phát hiện bệnh -> Hướng dẫn cách ly -> <b>Cung cấp phím gọi khẩn cấp</b> cho đúng trạm thú y địa bàn</i>.
+        Ứng dụng không chỉ dừng ở việc "tra cứu". Chúng em thiết kế quy trình khép kín: <i>Phát hiện bệnh -> Hướng dẫn cách ly/xử lý tại chỗ -> <b>Cung cấp phím gọi khẩn cấp</b> cho đúng Trạm Khuyến nông/Thú y địa bàn</i>.
         <br><br>
         <b>🛡️ 3. Đạo đức AI (AI Ethics):</b><br>
-        Ứng dụng được định vị là <b>Trợ lý sơ cấp cứu thông tin</b>, bảo vệ nông dân vùng cao khỏi các lời khuyên trôi nổi, xóa bỏ rào cản ngôn ngữ bằng tiếng địa phương, tuân thủ tuyệt đối quy định quản lý dịch tễ của Tỉnh Điện Biên.
+        Ứng dụng được định vị là <b>Trợ lý sơ cấp cứu thông tin</b>, bảo vệ nông dân vùng cao khỏi các lời khuyên trôi nổi, xóa bỏ rào cản ngôn ngữ bằng tiếng địa phương, tuân thủ tuyệt đối quy định quản lý dịch tễ & bảo vệ thực vật của Tỉnh Điện Biên.
     </div>
     """, unsafe_allow_html=True)
