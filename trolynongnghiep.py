@@ -147,7 +147,6 @@ with st.sidebar:
     with st.expander("👉 Hướng dẫn lấy mã API"):
         st.markdown("Vào [Google AI Studio](https://aistudio.google.com/app/apikey) -> Đăng nhập -> Create API key.")
     st.markdown("---")
-    st.caption("Dự án Khoa học Kỹ thuật | Điện Biên")
 
 # =====================
 # 4. HEADER & GIAO DIỆN CHÍNH
