@@ -32,7 +32,6 @@ st.markdown("""
     .download-btn>button { background: linear-gradient(to right, #0277bd, #039be5) !important; box-shadow: 0 6px 15px rgba(2, 119, 189, 0.3) !important; }
     .stTextArea textarea { font-size: 16px !important; border-radius: 10px !important; }
     
-    /* Style riêng cho box Nguồn tài liệu */
     .reference-box { background-color: #f8f9fa; padding: 15px; border-radius: 10px; border-left: 4px solid #1976d2; font-size: 14px; line-height: 1.5; color: #333;}
     </style>
 """, unsafe_allow_html=True)
@@ -44,9 +43,17 @@ if "history" not in st.session_state: st.session_state.history = []
 # =====================
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/862/862856.png", width=60)
-    st.markdown("### ⚙️ Cài đặt Quản trị")
-    st.caption("Dành riêng cho ban tổ chức/kỹ thuật viên nhập API Key của Google.")
     api_key = st.text_input("🔑 Google API Key:", type="password")
+    
+    # HƯỚNG DẪN LẤY API KEY ĐƯỢC THÊM VÀO ĐÂY
+    with st.expander("👉 Hướng dẫn lấy mã API Key (Miễn phí)"):
+        st.markdown("""
+        1. Truy cập trang web: <a href="https://aistudio.google.com/app/apikey" target="_blank"><b>Google AI Studio</b></a>.
+        2. Đăng nhập bằng tài khoản Gmail của bạn.
+        3. Bấm vào nút <b>Create API key</b>.
+        4. Sao chép (Copy) đoạn mã dài vừa tạo và dán vào ô trống phía trên.
+        """, unsafe_allow_html=True)
+        
     st.markdown("---")
     st.markdown("<b>Dự án dự thi Sáng tạo Thanh thiếu niên, Nhi đồng</b><br>Mục tiêu: Chuyển đổi số Nông nghiệp vùng cao.", unsafe_allow_html=True)
 
@@ -62,7 +69,7 @@ st.markdown("""
 
 st.markdown("""
 <div class='note-box'>
-    <b>👋 Lời ngỏ:</b> Ứng dụng hỗ trợ bà con chẩn đoán nhanh dịch bệnh (Hỗ trợ đọc tiếng Phổ thông, tiếng Thái và H'Mông). 
+    <b>👋 Lời ngỏ:</b> Ứng dụng hỗ trợ bà con chẩn đoán nhanh dịch bệnh (Hỗ trợ đọc tiếng Phổ thông, dịch tiếng dân tộc Thái và H'Mông vùng Tây Bắc). 
     <br><i>Lưu ý: Kết quả mang tính tham khảo bước đầu, bà con cần báo cho cán bộ Khuyến nông/Thú y nếu bệnh diễn biến nặng!</i>
 </div>
 """, unsafe_allow_html=True)
@@ -115,7 +122,7 @@ st.markdown("**Chọn ngôn ngữ muốn máy đọc và dịch:**")
 col_lang1, col_lang2, col_lang3 = st.columns(3)
 with col_lang1: use_vi = st.checkbox("🇻🇳 Tiếng Việt", value=True, disabled=True, help="Mặc định luôn có Tiếng Phổ thông")
 with col_lang2: use_hmong = st.checkbox("🏔️ Tiếng H’Mông", value=True)
-with col_lang3: use_thai = st.checkbox("🇹🇭 Tiếng Thái", value=True)
+with col_lang3: use_thai = st.checkbox("🌿 Tiếng Thái (Tây Bắc)", value=True)
 st.markdown("</div>", unsafe_allow_html=True)
 
 # BƯỚC 3: XỬ LÝ
@@ -128,9 +135,9 @@ if submit_btn:
     else:
         st.markdown("---")
         with st.spinner("⏳ Hệ thống đang đối chiếu dữ liệu thú y/nông nghiệp và chuẩn bị giọng đọc..."):
-            langs = ["Việt"]
-            if use_hmong: langs.append("H’Mông")
-            if use_thai: langs.append("Thái")
+            langs = ["Tiếng Phổ Thông"]
+            if use_hmong: langs.append("Tiếng dân tộc H’Mông")
+            if use_thai: langs.append("Tiếng dân tộc Thái (Tây Bắc Việt Nam)")
             lang_str = " – ".join(langs)
             extra_prompt = f"\n- Lời kể của bà con: {extra_info}" if extra_info else ""
 
@@ -143,14 +150,15 @@ Bạn là chuyên gia nông nghiệp và bác sĩ thú y đang công tác tại 
 3. Nếu ảnh mờ/không đúng bệnh: Từ chối chẩn đoán, yêu cầu chụp lại. TUYỆT ĐỐI KHÔNG ĐOÁN BỪA.
 4. LUÔN CÓ CÂU CHỐT: Yêu cầu bà con báo ngay cho Trạm thú y/Khuyến nông xã để được hỗ trợ.
 
-⚠️ QUY TẮC HIỂN THỊ (ĐỂ CẮT LỚP ÂM THANH):
-Không dùng từ hàn lâm. BẮT BUỘC chia rõ các thẻ:
+⚠️ QUY TẮC NGÔN NGỮ ĐỊA PHƯƠNG & HIỂN THỊ:
+- Tiếng Thái ở đây là ngôn ngữ của ĐỒNG BÀO DÂN TỘC THÁI tại Việt Nam, KHÔNG PHẢI tiếng của đất nước Thái Lan. Hãy dùng phiên âm chữ Latinh để bà con dễ đọc.
+- Không dùng từ hàn lâm. BẮT BUỘC chia rõ các thẻ:
 [VI] 
-(Nội dung tiếng Việt)
+(Nội dung Tiếng Phổ Thông)
 [HMN] 
-(Nội dung H'Mông - nếu có)
+(Nội dung tiếng dân tộc H'Mông - nếu có)
 [TH] 
-(Nội dung Thái - nếu có)
+(Nội dung tiếng dân tộc Thái Tây Bắc - nếu có)
 """
             result = analyze_real_image(api_key, image, prompt_text)
             
@@ -167,7 +175,7 @@ Không dùng từ hàn lâm. BẮT BUỘC chia rõ các thẻ:
                 hmn_text = hmn_match.group(1).strip() if hmn_match else ""
                 th_text = th_match.group(1).strip() if th_match else ""
 
-                display_text = result.replace("[VI]", "🇻🇳 **Tiếng Việt:**\n").replace("[HMN]", "\n---\n🏔️ **Tiếng H'Mông:**\n").replace("[TH]", "\n---\n🇹🇭 **Tiếng Thái:**\n")
+                display_text = result.replace("[VI]", "🇻🇳 **Tiếng Phổ thông:**\n").replace("[HMN]", "\n---\n🏔️ **Tiếng dân tộc H'Mông:**\n").replace("[TH]", "\n---\n🌿 **Tiếng dân tộc Thái (Tây Bắc):**\n")
                 
                 st.markdown("<div class='step-card' style='border-top: 4px solid #4caf50;'>", unsafe_allow_html=True)
                 st.markdown(display_text)
@@ -176,25 +184,17 @@ Không dùng từ hàn lâm. BẮT BUỘC chia rõ các thẻ:
                 st.markdown("<div class='step-title'>🔊 Nghe máy đọc kết quả</div>", unsafe_allow_html=True)
                 st.markdown("<div class='step-card'>", unsafe_allow_html=True)
                 
-                # Âm thanh Tiếng Việt (Phổ thông)
+                # Âm thanh Tiếng Phổ thông
                 if vi_text:
                     st.write("🇻🇳 **Giọng Tiếng Phổ thông:**")
-                    # Lọc bỏ các dấu markdown (*, #) để máy đọc tự nhiên, không bị vấp
                     clean_vi = vi_text.replace('*', '').replace('#', '')
                     audio_vi = generate_audio(clean_vi, 'vi')
                     if audio_vi: st.audio(audio_vi, format="audio/mp3")
 
-                # Âm thanh Tiếng H'Mông
-                if use_hmong and hmn_text:
-                    st.write("🏔️ **Giọng H'Mông:**")
-                    st.info("💡 **Ghi chú kỹ thuật:** Hiện tại hệ thống AI toàn cầu chưa hỗ trợ phát âm tiếng H'Mông chuẩn. Nhóm tác giả đang lên kế hoạch thu âm giọng người bản địa để cập nhật tính năng đọc tự động trong phiên bản tiếp theo!")
+                # Cảnh báo kỹ thuật cho ngôn ngữ đồng bào
+                if (use_hmong and hmn_text) or (use_thai and th_text):
+                    st.info("💡 **Ghi chú kỹ thuật (Hội đồng Giám khảo):** Hiện tại nền tảng Text-to-Speech toàn cầu (Google/Microsoft) chưa có bộ dữ liệu phát âm chuẩn cho tiếng dân tộc H'Mông và Thái tại vùng Tây Bắc Việt Nam. Tính năng tự động phát giọng bản địa sẽ được nâng cấp khi nhóm hoàn thiện bộ thu âm từ điển địa phương!")
                 
-                # Âm thanh Tiếng Thái
-                if use_thai and th_text:
-                    st.write("🇹🇭 **Giọng Thái:**")
-                    clean_th = th_text.replace('*', '').replace('#', '')
-                    audio_th = generate_audio(clean_th, 'th')
-                    if audio_th: st.audio(audio_th, format="audio/mp3")
                 st.markdown("</div>", unsafe_allow_html=True)
 
                 st.session_state.history.insert(0, {"time": datetime.now().strftime("%d/%m/%Y %H:%M"), "result": display_text})
@@ -213,11 +213,11 @@ if st.session_state.history:
 # 4. THÔNG TIN DỰ ÁN & HỌC LIỆU
 # ===============================
 st.markdown("<br><br>", unsafe_allow_html=True)
-with st.expander("ℹ️ Thông tin dự án (Dành cho Hội đồng Giám khảo)"):
+with st.expander("ℹ️ Nguồn dữ liệu tham khảo)"):
     st.markdown("""
     <div class='reference-box'>
         <b>🎯 1. Tính mới & Sáng tạo của mô hình:</b><br>
-        Lần đầu tiên ứng dụng AI tạo sinh (Generative AI) được tùy biến riêng cho nông nghiệp vùng cao. Ứng dụng phá vỡ rào cản ngôn ngữ bằng cách hỗ trợ dịch và đọc tự động Tiếng Thái, Tiếng H'Mông, giúp đồng bào dân tộc thiểu số dễ dàng tiếp cận khoa học kỹ thuật.
+        Lần đầu tiên ứng dụng AI tạo sinh (Generative AI) được tùy biến riêng cho nông nghiệp vùng Tây Bắc. Ứng dụng phá vỡ rào cản ngôn ngữ bằng cách hỗ trợ dịch tự động sang Tiếng Thái, Tiếng H'Mông (phiên âm Latinh), giúp đồng bào dân tộc thiểu số dễ dàng tiếp cận khoa học kỹ thuật.
         <br><br>
         <b>⚙️ 2. Khả năng áp dụng thực tiễn:</b><br>
         Ứng dụng chạy mượt mà trên nền tảng Web/Điện thoại thông minh mà không cần cài đặt phức tạp. Dữ liệu bệnh được đối chiếu trực tiếp từ các nguồn uy tín:
