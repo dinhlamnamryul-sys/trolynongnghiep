@@ -325,7 +325,7 @@ Bạn là AI chẩn đoán nông nghiệp uy tín chuyên trách vùng Tây Bắ
 
 # ----------------- TÀI LIỆU DỰ ÁN -----------------
 st.markdown("<br>", unsafe_allow_html=True)
-with st.expander("ℹ️ Minh bạch Công nghệ & Học liệu Dự án (Dành cho Hội đồng Giám khảo)"):
+with st.expander("Học liệu Dự án"):
     st.markdown("""
     <div class='reference-box'>
         <b style='color:#0f172a; font-size:16px;'>🔬 1. Bản chất Hệ thống RAG (Retrieval-Augmented Generation) của Dự án</b><br>
