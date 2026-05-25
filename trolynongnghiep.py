@@ -229,6 +229,8 @@ with col_left:
 
     if image:
         st.success("✅ Hình ảnh đã được nạp thành công!")
+        # THÊM PREVIEW HÌNH ẢNH SAU KHI UPLOAD
+        st.image(image, caption="Bản xem trước hình ảnh", use_container_width=True)
     
     st.markdown("<br>", unsafe_allow_html=True)
 
