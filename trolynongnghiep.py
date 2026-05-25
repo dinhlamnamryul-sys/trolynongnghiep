@@ -10,7 +10,6 @@ from gtts import gTTS
 # =====================
 # 1. CẤU HÌNH TRANG TỐI ƯU & ẨN GIAO DIỆN MẶC ĐỊNH
 # =====================
-# Chuyển layout sang "wide" để sử dụng tối đa chiều rộng màn hình
 st.set_page_config(page_title="Trợ Lý Nông Nghiệp Tây Bắc", page_icon="🌿", layout="wide", initial_sidebar_state="expanded")
 
 st.markdown("""
@@ -202,13 +201,8 @@ def generate_audio(text, lang_code):
 col_left, col_right = st.columns([1, 1.2], gap="large")
 
 with col_left:
-    # ----------------- BƯỚC 1 -----------------
-    st.markdown("""
-    <div class='modern-card'>
-        <div class='card-title'><div class='card-title-icon'>📸</div> Thu thập Dữ liệu Hình ảnh</div>
-    """, unsafe_allow_html=True)
-
-    tab1, tab2 = st.tabs(["Mở Camera Điện Thoại", "Tải tệp từ thiết bị"])
+    # ----------------- BƯỚC 1 (Đã gỡ bỏ ô div bao quanh) -----------------
+    tab1, tab2 = st.tabs(["📸 Mở Camera Điện Thoại", "📁 Tải tệp từ thiết bị"])
     photo, upload = None, None
     with tab1: photo = st.camera_input(" ")
     with tab2: upload = st.file_uploader(" ", type=["png", "jpg", "jpeg"])
@@ -219,7 +213,8 @@ with col_left:
     if image:
         st.success("✅ Hình ảnh đã được nạp vào hệ thống!")
         with st.expander("👁️ Kiểm tra lại hình ảnh"): st.image(image, use_container_width=True)
-    st.markdown("</div>", unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
 
     # ----------------- BƯỚC 2 -----------------
     st.markdown("""
