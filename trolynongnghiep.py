@@ -23,6 +23,7 @@ st.markdown("""
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
 
+    /* Cấu hình chuẩn trên Máy tính (Desktop) */
     .hero-banner {
         background: linear-gradient(135deg, #047857 0%, #10b981 100%);
         border-radius: 20px;
@@ -95,6 +96,22 @@ st.markdown("""
     .link-box:hover { background-color: #f1f5f9; transform: translateX(5px); border-color: #cbd5e1; }
     
     .reference-box { background-color: #f8f9fa; padding: 15px; border-radius: 12px; border-left: 5px solid #0284c7; font-size: 13.5px; line-height: 1.6; color: #334155;}
+
+    /* ==================================================
+       💥 CẤU HÌNH ĐẶC BIỆT TỐI ƯU TRÊN ĐIỆN THOẠI (RESPONSIVE)
+       ================================================== */
+    @media (max-width: 768px) {
+        .hero-banner { padding: 15px 10px; margin-top: -20px; margin-bottom: 15px; }
+        .hero-banner h1 { font-size: 20px; }
+        .hero-banner p { font-size: 12px; }
+        .status-badge { padding: 6px 14px; font-size: 11px; }
+        .modern-card { padding: 12px; margin-bottom: 12px; border-radius: 12px; }
+        .card-title { font-size: 14px; margin-bottom: 10px; }
+        .card-title-icon { width: 26px; height: 26px; font-size: 14px; }
+        div.stButton > button:first-child { font-size: 14px; padding: 10px 0; border-radius: 10px; }
+        .alert-pro { padding: 10px; font-size: 11px; margin-bottom: 15px; }
+        .link-box { padding: 8px 10px; font-size: 12px; }
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -141,8 +158,8 @@ RAG_KNOWLEDGE_BASE = """
 # 3. SIDEBAR (QUẢN TRỊ VIÊN)
 # =====================
 with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/862/862856.png", width=50)
-    st.markdown("<h3 style='color:#1e293b; margin-top:10px;'>Cấu hình Hệ thống</h3>", unsafe_allow_html=True)
+    st.image("https://cdn-icons-png.flaticon.com/512/862/862856.png", width=40)
+    st.markdown("<h4 style='color:#1e293b; margin-top:5px;'>Cấu hình Hệ thống</h4>", unsafe_allow_html=True)
     api_key = st.text_input("🔑 Cấp quyền Google AI API:", type="password")
     with st.expander("👉 Hướng dẫn lấy mã API"):
         st.markdown("Vào [Google AI Studio](https://aistudio.google.com/app/apikey) -> Đăng nhập -> Create API key.")
@@ -197,11 +214,11 @@ def generate_audio(text, lang_code):
         return fp.getvalue()
     except: return None
 
-# TẠO 2 CỘT GIAO DIỆN CHÍNH (CỘT NHẬP LIỆU VÀ CỘT KẾT QUẢ)
-col_left, col_right = st.columns([1, 1.2], gap="large")
+# TẠO 2 CỘT GIAO DIỆN CHÍNH
+col_left, col_right = st.columns([1, 1.2], gap="medium")
 
 with col_left:
-    # ----------------- BƯỚC 1 (Đã gỡ bỏ ô div bao quanh) -----------------
+    # ----------------- BƯỚC 1 -----------------
     tab1, tab2 = st.tabs(["📸 Mở Camera Điện Thoại", "📁 Tải tệp từ thiết bị"])
     photo, upload = None, None
     with tab1: photo = st.camera_input(" ")
@@ -211,8 +228,7 @@ with col_left:
     elif upload: image = Image.open(upload)
 
     if image:
-        st.success("✅ Hình ảnh đã được nạp vào hệ thống!")
-        with st.expander("👁️ Kiểm tra lại hình ảnh"): st.image(image, use_container_width=True)
+        st.success("✅ Hình ảnh đã được nạp thành công!")
     
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -221,9 +237,9 @@ with col_left:
     <div class='modern-card'>
         <div class='card-title'><div class='card-title-icon'>📝</div> Dữ liệu Lâm sàng & Ngôn ngữ</div>
     """, unsafe_allow_html=True)
-    extra_info = st.text_area("", placeholder="Nhập mô tả của nông dân (VD: Gà chảy nhớt dãi xù lông bỏ ăn, lá lúa bị đốm mắt én giống cháy khét...)", height=80)
+    extra_info = st.text_area("", placeholder="Nhập mô tả của nông dân (VD: Gà chảy nhớt dãi xù lông bỏ ăn, lá lúa bị đốm mắt én giống cháy khét...)", height=70)
 
-    st.markdown("<br>**Cấu hình ngôn ngữ kết quả:**", unsafe_allow_html=True)
+    st.markdown("<br>**Ngôn ngữ kết quả:**", unsafe_allow_html=True)
     col_lang1, col_lang2 = st.columns(2)
     with col_lang1: use_vi = st.checkbox("🇻🇳 Tiếng Việt", value=True, disabled=True)
     with col_lang2: use_hmong = st.checkbox("🏔️ Tiếng H’Mông", value=True)
@@ -232,34 +248,30 @@ with col_left:
     # ----------------- NÚT XỬ LÝ -----------------
     submit_btn = st.button("🚀 KÍCH HOẠT AI CHẨN ĐOÁN NGAY")
     
-    # Bổ sung tài liệu vào cuối cột trái cho gọn
+    # Học liệu Dự án đặt gọn gàng ở cuối cột nhập liệu
     st.markdown("<br>", unsafe_allow_html=True)
     with st.expander("Học liệu Dự án"):
         st.markdown("""
         <div class='reference-box'>
-            <b style='color:#0f172a; font-size:15px;'>🔬 1. Bản chất Hệ thống RAG (Retrieval-Augmented Generation) của Dự án</b><br>
-            Để triệt tiêu hiện tượng "Ảo giác AI" nguy hiểm trong y tế nông nghiệp, mô hình ứng dụng kỹ thuật RAG. Trong phiên bản mẫu thử nghiệm (Prototype) này, nhóm tác giả đã tiến hành <b>số hóa thủ công (Manual Indexing)</b> các tài liệu phác đồ thật của cơ quan chức năng để nạp trực tiếp thành Cơ sở dữ liệu nội bộ cố định. 
+            <b style='color:#0f172a; font-size:14px;'>🔬 1. Bản chất Hệ thống RAG</b><br>
+            Mô hình ứng dụng kỹ thuật RAG số hóa thủ công (Manual Indexing) tài liệu phác đồ thật của cơ quan chức năng để nạp trực tiếp thành Cơ sở dữ liệu nội bộ, bảo đảm đầu ra chính xác tuyệt đối.
             <br><br>
-            Khi có yêu cầu, thuật toán sẽ cưỡng bức AI bắt buộc phải quét, đối chiếu chéo thông tin hình ảnh với kho dữ liệu luật định này, bảo đảm đầu ra chính xác tuyệt đối theo danh mục cho phép.
-            <br><br>
-            <b style='color:#0f172a; font-size:15px;'>📚 2. Nguồn tài liệu Số hóa gốc:</b>
+            <b style='color:#0f172a; font-size:14px;'>📚 2. Nguồn tài liệu gốc:</b>
             <ul>
-                <li><b>Phác đồ Thú y Quốc gia:</b> Dữ liệu trích xuất từ văn bản chính thức của <a href='http://www.khuyennongvn.gov.vn/' target='_blank' style='color: #0284c7; text-decoration: none;'><b>Trung tâm Khuyến nông Quốc gia</b></a> và <a href='http://cucthuy.gov.vn/' target='_blank' style='color: #0284c7; text-decoration: none;'><b>Cục Thú y Việt Nam</b></a>.</li>
-                <li><b>Cẩm nang nông nghiệp đặc thù:</b> Hướng dẫn phòng chống sương muối, rét hại vùng cao trích từ <a href='https://sonongnghiep.dienbien.gov.vn/' target='_blank' style='color: #0284c7; text-decoration: none;'><b>Sở Nông nghiệp & PTNT tỉnh Điện Biên</b></a>.</li>
+                <li><b>Phác đồ Thú y:</b> Trích xuất từ <a href='http://www.khuyennongvn.gov.vn/' target='_blank' style='color: #0284c7; text-decoration: none;'><b>Khuyến nông Quốc gia</b></a> & <a href='http://cucthuy.gov.vn/' target='_blank' style='color: #0284c7; text-decoration: none;'><b>Cục Thú y</b></a>.</li>
+                <li><b>Thời tiết vùng cao:</b> Hướng dẫn của <a href='https://sonongnghiep.dienbien.gov.vn/' target='_blank' style='color: #0284c7; text-decoration: none;'><b>Sở NN&PTNT Điện Biên</b></a>.</li>
             </ul>
-            <b style='color:#0f172a; font-size:15px;'>🚀 3. Hướng phát triển:</b><br>
-            Nhóm tác giả định hướng sẽ xin cấp phép kết nối cổng mạng an toàn để đồng bộ hóa dữ liệu tự động hoàn toàn dưới dạng API của Sở, đồng thời tích hợp sâu hệ thống thành tiện ích Zalo Mini App.
         </div>
         """, unsafe_allow_html=True)
 
 
 with col_right:
-    # ----------------- KẾT QUẢ -----------------
+    # ----------------- KẾT QUẢ CHẨN ĐOÁN VÀ ẢNH SONG SONG -----------------
     if submit_btn:
-        if not image: st.error("⚠️ Vui lòng cung cấp hình ảnh ở cột bên trái!")
+        if not image: st.error("⚠️ Vui lòng chụp hoặc tải ảnh lên ở cột bên trái!")
         elif not api_key: st.error("⚠️ Hệ thống chưa được cấp quyền (Nhập API Key ở Menu trái)!")
         else:
-            with st.spinner("⏳ AI đang trích xuất dữ liệu lâm sàng và đối chiếu với Cơ sở dữ liệu Luật định..."):
+            with st.spinner("⏳ AI đang trích xuất dữ liệu lâm sàng và đối chiếu dữ liệu..."):
                 langs = ["Tiếng Phổ Thông"]
                 if use_hmong: langs.append("Tiếng dân tộc H’Mông")
                 lang_str = " – ".join(langs)
@@ -294,15 +306,22 @@ Bạn là AI chẩn đoán nông nghiệp uy tín chuyên trách vùng Tây Bắ
 
                     display_text = result.replace("[VI]", "🇻🇳 **HỒ SƠ TIẾNG VIỆT:**\n").replace("[HMN]", "\n---\n🏔️ **HỒ SƠ TIẾNG H'MÔNG:**\n")
                     
-                    # Vùng kết quả
+                    # HỘP CHỨA KẾT QUẢ ĐỒNG BỘ: ẢNH 1 BÊN - CHẨN ĐOÁN 1 BÊN
                     st.markdown("""
                     <div class='modern-card' style='border-top: 4px solid #10b981;'>
-                        <div class='card-title'><div class='card-title-icon' style='background:#dcfce7; color:#16a34a;'>📋</div> Kết quả Phân tích từ Hệ thống</div>
+                        <div class='card-title'><div class='card-title-icon' style='background:#dcfce7; color:#16a34a;'>📋</div> Kết quả Phân tích & Phác đồ Đối chiếu</div>
                     """, unsafe_allow_html=True)
-                    st.markdown(display_text)
+                    
+                    # Chia nhỏ cột nội bộ để ảnh nằm cạnh chữ chẩn đoán
+                    img_col, txt_col = st.columns([1, 1.8], gap="small")
+                    with img_col:
+                        st.image(image, use_container_width=True, caption="Ảnh vật nuôi/cây trồng đã nạp")
+                    with txt_col:
+                        st.markdown(display_text)
+                    
                     st.markdown("</div>", unsafe_allow_html=True)
                     
-                    # Âm thanh
+                    # Âm thanh hỗ trợ
                     st.markdown("""
                     <div class='modern-card'>
                         <div class='card-title'><div class='card-title-icon' style='background:#f3e8ff; color:#9333ea;'>🔊</div> Trợ lý Giọng nói Phổ thông</div>
@@ -313,19 +332,19 @@ Bạn là AI chẩn đoán nông nghiệp uy tín chuyên trách vùng Tây Bắ
                         audio_vi = generate_audio(clean_vi, 'vi')
                         if audio_vi: st.audio(audio_vi, format="audio/mp3")
                     if (use_hmong and hmn_text):
-                        st.info("💡 Hệ thống AI toàn cầu hiện đang thiếu bộ dữ liệu âm vị học H'Mông. Tính năng Text-to-Speech bản địa đang chờ bổ sung từ ngân hàng dữ liệu thu âm thực tế địa phương.")
+                        st.info("💡 Tính năng Text-to-Speech tiếng H'Mông bản địa đang chờ bổ sung từ ngân hàng dữ liệu thu âm thực tế địa phương.")
                     st.markdown("</div>", unsafe_allow_html=True)
 
                     st.session_state.history.insert(0, {"time": datetime.now().strftime("%d/%m/%Y %H:%M"), "result": display_text})
     
     else:
-        st.info("👈 **Vui lòng nhập liệu** (Tải ảnh, điền mô tả, chọn ngôn ngữ) ở cột bên trái và nhấn nút **Kích hoạt AI** để xem kết quả chẩn đoán tại đây.")
+        st.info("👈 **Mời bà con nhập dữ liệu** (Tải ảnh, điền mô tả) ở cột bên trái rồi bấm nút **Kích hoạt AI** để xem kết quả chẩn đoán hiển thị tại đây.")
 
-    # Luôn hiển thị cổng thông tin khẩn cấp ở cột phải
+    # Luôn hiển thị cổng thông tin khẩn cấp ở cột bên phải
     st.markdown("""
     <div class='modern-card'>
     <div class='card-title'><div class='card-title-icon' style='background:#fee2e2; color:#ef4444;'>🚨</div> Cổng Thông Tin Hỗ Trợ Khẩn Cấp</div>
-    <p style='color:#475569; font-size:13px; margin-bottom:15px;'>Bà con vui lòng truy cập các kênh chính thống dưới đây để tìm kiếm sự hỗ trợ trực tiếp từ cơ quan chức năng:</p>
+    <p style='color:#475569; font-size:12px; margin-bottom:12px;'>Bà con truy cập các kênh chính thống để tìm kiếm sự hỗ trợ trực tiếp từ cơ quan chức năng khi dịch bệnh lây lan:</p>
 
     <a href='https://sonongnghiep.dienbien.gov.vn/' target='_blank' style='text-decoration: none;'>
     <div class='link-box' style='border-left: 4px solid #0ea5e9;'>🌐 Sở Nông nghiệp & PTNT tỉnh Điện Biên</div>
