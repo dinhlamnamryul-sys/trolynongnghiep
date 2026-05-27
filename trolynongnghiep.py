@@ -155,18 +155,7 @@ RAG_KNOWLEDGE_BASE = """
 """
 
 # =====================
-# 3. SIDEBAR (QUẢN TRỊ VIÊN)
-# =====================
-with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/862/862856.png", width=40)
-    st.markdown("<h4 style='color:#1e293b; margin-top:5px;'>Cấu hình Hệ thống</h4>", unsafe_allow_html=True)
-    api_key = st.text_input("🔑 Cấp quyền Google AI API:", type="password")
-    with st.expander("👉 Hướng dẫn lấy mã API"):
-        st.markdown("Vào [Google AI Studio](https://aistudio.google.com/app/apikey) -> Đăng nhập -> Create API key.")
-    st.markdown("---")
-
-# =====================
-# 4. HEADER & GIAO DIỆN CHÍNH
+# 3. HEADER & GIAO DIỆN CHÍNH
 # =====================
 st.markdown("""
 <div class='hero-banner'>
@@ -189,6 +178,19 @@ st.markdown("""
     <b>📌 Lưu ý y tế nông nghiệp:</b> Phác đồ được nội suy dựa trên Cơ sở dữ liệu RAG nội bộ chỉ mang tính chất sơ cứu ban đầu. Yêu cầu báo cáo cán bộ chuyên môn khi có dấu hiệu lây lan.
 </div>
 """, unsafe_allow_html=True)
+
+# =====================
+# CẤU HÌNH API KEY (LUÔN HIỂN THỊ TRÊN GIAO DIỆN CHÍNH)
+# =====================
+st.markdown("""
+<div class='modern-card'>
+    <div class='card-title'><div class='card-title-icon' style='background:#fef08a; color:#ca8a04;'>🔑</div> Cấp quyền Trí tuệ Nhân tạo (API)</div>
+""", unsafe_allow_html=True)
+api_key = st.text_input("Nhập mã Google AI API Key của bạn để sử dụng hệ thống:", type="password", placeholder="AIzaSy...")
+with st.expander("👉 Xem hướng dẫn lấy mã API Key (Miễn phí)"):
+    st.markdown("Truy cập [Google AI Studio](https://aistudio.google.com/app/apikey) -> Đăng nhập bằng tài khoản Google -> Chọn **Create API key** và dán vào ô bên trên.")
+st.markdown("</div>", unsafe_allow_html=True)
+
 
 def analyze_real_image(api_key, image, prompt):
     if image.mode == "RGBA": image = image.convert("RGB")
@@ -271,7 +273,7 @@ with col_right:
     # ----------------- KẾT QUẢ CHẨN ĐOÁN VÀ ẢNH SONG SONG -----------------
     if submit_btn:
         if not image: st.error("⚠️ Vui lòng chụp hoặc tải ảnh lên ở cột bên trái!")
-        elif not api_key: st.error("⚠️ Hệ thống chưa được cấp quyền (Nhập API Key ở Menu trái)!")
+        elif not api_key: st.error("⚠️ Hệ thống chưa được cấp quyền! Vui lòng nhập API Key ở phần trên.")
         else:
             with st.spinner("⏳ AI đang trích xuất dữ liệu lâm sàng và đối chiếu dữ liệu..."):
                 langs = ["Tiếng Phổ Thông"]
